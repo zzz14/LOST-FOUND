@@ -11,54 +11,89 @@ class CustomWeChatView(WeChatView):
     lib = WeChatLib(WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET)
 
     handlers = [
-        HelpOrSubscribeHandler, UnbindOrUnsubscribeHandler, BindAccountHandler, BookEmptyHandler,
+        HelpOrSubscribeHandler, UnbindOrUnsubscribeHandler, BindAccountHandler,
     ]
     error_message_handler = ErrorHandler
     default_handler = DefaultHandler
 
     event_keys = {
-        'book_what': 'SERVICE_BOOK_WHAT',
-        'get_ticket': 'SERVICE_GET_TICKET',
-        'account_bind': 'SERVICE_BIND',
-        'help': 'SERVICE_HELP',
-        'book_empty': 'BOOKING_EMPTY',
-        'book_header': 'BOOKING_ACTIVITY_',
+        'mine': 'MINE',
+        'help': 'HELP',
+        'school_office':'SCHOOL_OFFICE',
+        'found_by_key':'FOUND_BY_KEY',
+        'found_by_place':'FOUND_BY_PLACE',
+        'release_found':'RELEASE_FOUND',
+        'lost_by_key': 'LOST_BY_KEY',
+        'lost_by_place': 'LOST_BY_PLACE',
+        'release_lost': 'RELEASE_LOST',
     }
 
     menu = {
         'button': [
             {
-                "name": "服务",
+                "name": "失物招领",
                 "sub_button": [
                     {
                         "type": "click",
-                        "name": "抢啥",
-                        "key": event_keys['book_what'],
+                        "name": "关键字查询",
+                        "key": event_keys['found_by_key'],
                     },
                     {
                         "type": "click",
-                        "name": "查票",
-                        "key": event_keys['get_ticket'],
+                        "name": "地点查询",
+                        "key": event_keys['found_by_place'],
                     },
                     {
                         "type": "click",
-                        "name": "绑定",
-                        "key": event_keys['account_bind'],
+                        "name": "发布失物招领",
+                        "key": event_keys['release_found'],
+                    }
+                ]
+            },
+            {
+                "name": "寻物启事",
+                "sub_button": [
+                    {
+                        "type": "click",
+                        "name": "关键字查询",
+                        "key": event_keys['lost_by_key'],
+                    },
+                    {
+                        "type": "click",
+                        "name": "地点查询",
+                        "key": event_keys['lost_by_place'],
+                    },
+                    {
+                        "type": "click",
+                        "name": "发布寻物启事",
+                        "key": event_keys['release_lost'],
+                    }
+                ]
+            },
+            {
+                "name": "其他",
+                "sub_button": [
+                    {
+                        "type": "click",
+                        "name": "校内失物招领处",
+                        "key": event_keys['school_office'],
                     },
                     {
                         "type": "click",
                         "name": "帮助",
                         "key": event_keys['help'],
+                    },
+                    {
+                        "type": "click",
+                        "name": "我的",
+                        "key": event_keys['mine'],
                     }
                 ]
             },
-            {
-                "name": "抢票",
-                "sub_button": []
-            }
         ]
     }
 
+'''
     @classmethod
     def get_book_btn(cls):
         return cls.menu['button'][-1]
@@ -107,4 +142,4 @@ class CustomWeChatView(WeChatView):
             return cls.update_menu(Activity.objects.filter(
                 id__in=activity_ids, status=Activity.STATUS_PUBLISHED, book_end__gt=timezone.now()
             ).order_by('book_end')[: 5])
-        cls.lib.set_wechat_menu(cls.menu)
+        cls.lib.set_wechat_menu(cls.menu)'''

@@ -2,25 +2,7 @@ from django.db import models
 
 from codex.baseerror import LogicError
 
-class Lost(models.Model):
-    name = models.CharField(max_length=128)
-    key = models.CharField(max_length=64, db_index=True)
-    contact = models.CharField(max_length=128)
-    description = models.TextField()
-    lostTime = models.DateTimeField(db_index=True)
-    lostPlace = models.CharField(max_length=128)
-    reward = models.CharField(max_length=128)
 
-class Found(models.Model):
-    name = models.CharField(max_length=128)
-    key = models.CharField(max_length=64, db_index=True)
-    contact = models.CharField(max_length=128)
-    description = models.TextField()
-    lostTime = models.DateTimeField(db_index=True)
-    lostPlace = models.CharField(max_length=128)
-    reward = models.CharField(max_length=128)
-
-'''
 class User(models.Model):
     open_id = models.CharField(max_length=64, unique=True, db_index=True)
     student_id = models.CharField(max_length=32, unique=True, db_index=True)
@@ -33,6 +15,29 @@ class User(models.Model):
             raise LogicError('User not found')
 
 
+class Lost(models.Model):
+    name = models.CharField(max_length=128)
+    key = models.CharField(max_length=64, db_index=True)
+    contact = models.CharField(max_length=128)
+    description = models.TextField()
+    lostTime = models.DateTimeField(db_index=True)
+    lostPlace = models.CharField(max_length=128)
+    reward = models.CharField(max_length=128)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
+
+
+class Found(models.Model):
+    name = models.CharField(max_length=128)
+    key = models.CharField(max_length=64, db_index=True)
+    contact = models.CharField(max_length=128)
+    description = models.TextField()
+    lostTime = models.DateTimeField(db_index=True)
+    lostPlace = models.CharField(max_length=128)
+    reward = models.CharField(max_length=128)
+    user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
+
+
+'''
 class Activity(models.Model):
     name = models.CharField(max_length=128)
     key = models.CharField(max_length=64, db_index=True)
