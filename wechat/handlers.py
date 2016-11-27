@@ -37,31 +37,3 @@ class HelpOrSubscribeHandler(WeChatHandler):
             'Url': self.url_help(),
         })
 
-
-class UnbindOrUnsubscribeHandler(WeChatHandler):
-
-    def check(self):
-        return self.is_text('解绑') or self.is_event('unsubscribe')
-
-    def handle(self):
-        self.user.student_id = ''
-        self.user.save()
-        return self.reply_text(self.get_message('unbind_account'))
-
-
-class BindAccountHandler(WeChatHandler):
-
-    def check(self):
-        return self.is_text('绑定') or self.is_event_click(self.view.event_keys['account_bind'])
-
-    def handle(self):
-        return self.reply_text(self.get_message('bind_account'))
-
-
-class BookEmptyHandler(WeChatHandler):
-
-    def check(self):
-        return self.is_event_click(self.view.event_keys['book_empty'])
-
-    def handle(self):
-        return self.reply_text(self.get_message('book_empty'))
