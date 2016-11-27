@@ -1,8 +1,8 @@
 from django.utils import timezone
 
-from lost_and_found.wrapper import WeChatView, WeChatLib
-from lost_and_found.handlers import *
-from lost_and_found.models import Lost, Found
+from wechat.wrapper import WeChatView, WeChatLib
+from wechat.handlers import *
+from wechat.models import Lost, Found
 from LostAndFound.settings import WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET
 
 

@@ -13,7 +13,7 @@ from django.template.loader import get_template
 
 from LostAndFound import settings
 from codex.baseview import BaseView
-from lost_and_found.models import Lost, Found
+from wechat.models import Lost, Found
 
 
 __author__ = "Epsirom"

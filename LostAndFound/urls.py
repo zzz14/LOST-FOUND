@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from lost_and_found.views import CustomWeChatView
+from wechat.views import CustomWeChatView
 from LostAndFound.views import StaticFileView
 
 

@@ -1,7 +1,7 @@
 from codex.baseerror import *
 from codex.baseview import APIView
 
-from lost_and_found.models import Lost, Found
+from wechat.models import Lost, Found
 
 
 class UserBind(APIView):

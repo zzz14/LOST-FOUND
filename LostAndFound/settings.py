@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     # 'django.contrib.staticfiles',
     'django.contrib.admin',
 
-    'lost_and_found',
+    'wechat',
     'adminpage',
     'userpage',
 ]

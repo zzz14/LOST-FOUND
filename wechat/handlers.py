@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-from lost_and_found.wrapper import WeChatHandler
+from wechat.wrapper import WeChatHandler
 
 
 __author__ = "Epsirom"
