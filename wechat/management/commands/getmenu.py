@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand, CommandError
 
 from wechat.views import CustomWeChatView
-from wechat.models import Activity
 
 
 __author__ = "Epsirom"

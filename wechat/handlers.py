@@ -36,4 +36,3 @@ class HelpOrSubscribeHandler(WeChatHandler):
             'Description': self.get_message('help_description'),
             'Url': self.url_help(),
         })
-

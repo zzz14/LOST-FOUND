@@ -24,6 +24,7 @@ class Lost(models.Model):
     lostPlace = models.CharField(max_length=128)
     reward = models.CharField(max_length=128)
     user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
+    status = models.IntegerField()
 
 
 class Found(models.Model):
@@ -35,6 +36,7 @@ class Found(models.Model):
     lostPlace = models.CharField(max_length=128)
     reward = models.CharField(max_length=128)
     user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
+    status = models.IntegerField()
 
 
 '''

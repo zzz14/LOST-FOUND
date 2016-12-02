@@ -9,5 +9,5 @@ __author__ = "Epsirom"
 
 
 urlpatterns = [
-    url(r'^user/bind/?$', UserBind.as_view()),
+    url(r'^lost/list/?$', FoundList.as_view()),
 ]

@@ -1,9 +1,9 @@
 from codex.baseerror import *
 from codex.baseview import APIView
 
-from wechat.models import Lost, Found
+from wechat.models import Lost, Found, User
 
-
+'''
 class UserBind(APIView):
 
     def validate_user(self):
@@ -23,3 +23,24 @@ class UserBind(APIView):
         self.validate_user()
         user.student_id = self.input['student_id']
         user.save()
+'''
+# 点击“丢了东西”后出现的列表（被拾到东西的列表）
+class FoundList(APIView):
+    '''
+    def get(self):
+        temp = []
+        for found in Found.objects.all():
+            temp = {}
+            temp['id'] = activity.id
+            temp['name'] = activity.name
+            temp['description'] = activity.description
+            temp['place'] = activity.place
+            temp['status'] = activity.status
+            temp['startTime'] = mktime(activity.start_time.timetuple())
+            temp['endTime'] = mktime(activity.end_time.timetuple())
+            temp['bookStart'] = mktime(activity.book_start.timetuple())
+            temp['bookEnd'] = mktime(activity.book_end.timetuple())
+            temp['currentTime'] = time.time()
+            items.append(temp)
+        return items
+'''

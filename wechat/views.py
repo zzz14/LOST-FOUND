@@ -3,7 +3,7 @@ from django.utils import timezone
 from wechat.wrapper import WeChatView, WeChatLib
 from wechat.handlers import *
 from wechat.models import Lost, Found
-from LostAndFound.settings import WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET
+from LostAndFound.settings import WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET, SITE_DOMAIN
 
 
 class CustomWeChatView(WeChatView):
@@ -20,62 +20,26 @@ class CustomWeChatView(WeChatView):
         'mine': 'MINE',
         'help': 'HELP',
         'school_office':'SCHOOL_OFFICE',
-        'found_by_key':'FOUND_BY_KEY',
-        'found_by_place':'FOUND_BY_PLACE',
-        'release_found':'RELEASE_FOUND',
-        'lost_by_key': 'LOST_BY_KEY',
-        'lost_by_place': 'LOST_BY_PLACE',
-        'release_lost': 'RELEASE_LOST',
     }
 
     menu = {
         'button': [
             {
-                "name": "失物招领",
-                "sub_button": [
-                    {
-                        "type": "click",
-                        "name": "关键字查询",
-                        "key": event_keys['found_by_key'],
-                    },
-                    {
-                        "type": "click",
-                        "name": "地点查询",
-                        "key": event_keys['found_by_place'],
-                    },
-                    {
-                        "type": "click",
-                        "name": "发布失物招领",
-                        "key": event_keys['release_found'],
-                    }
-                ]
+                "type": "view",
+                "name": "丢了东西",
+                "url": SITE_DOMAIN + '/lost/list',
             },
             {
-                "name": "寻物启事",
-                "sub_button": [
-                    {
-                        "type": "click",
-                        "name": "关键字查询",
-                        "key": event_keys['lost_by_key'],
-                    },
-                    {
-                        "type": "click",
-                        "name": "地点查询",
-                        "key": event_keys['lost_by_place'],
-                    },
-                    {
-                        "type": "click",
-                        "name": "发布寻物启事",
-                        "key": event_keys['release_lost'],
-                    }
-                ]
+                "type": "view",
+                "name": "捡了东西",
+                "url": "http://www.baidu.com",
             },
             {
                 "name": "其他",
                 "sub_button": [
                     {
                         "type": "click",
-                        "name": "校内失物招领处",
+                        "name": "失物招领处",
                         "key": event_keys['school_office'],
                     },
                     {
