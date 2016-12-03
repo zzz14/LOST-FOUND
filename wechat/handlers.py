@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 #
 from wechat.wrapper import WeChatHandler
+import os
+from django.conf import settings
 
 
 __author__ = "Epsirom"

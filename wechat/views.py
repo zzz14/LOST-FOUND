@@ -16,12 +16,6 @@ class CustomWeChatView(WeChatView):
     error_message_handler = ErrorHandler
     default_handler = DefaultHandler
 
-    event_keys = {
-        'mine': 'MINE',
-        'help': 'HELP',
-        'school_office':'SCHOOL_OFFICE',
-    }
-
     menu = {
         'button': [
             {
@@ -32,25 +26,30 @@ class CustomWeChatView(WeChatView):
             {
                 "type": "view",
                 "name": "捡了东西",
-                "url": "http://www.baidu.com",
+                "url": SITE_DOMAIN + '/found/list',
             },
             {
                 "name": "其他",
                 "sub_button": [
                     {
-                        "type": "click",
+                        "type": "view",
                         "name": "失物招领处",
-                        "key": event_keys['school_office'],
+                        "url": SITE_DOMAIN + '/school_office/list',
                     },
                     {
-                        "type": "click",
+                        "type": "view",
+                        "name": "我的失物",
+                        "url": SITE_DOMAIN + '/mine/lost',
+                    },
+                    {
+                        "type": "view",
+                        "name": "我的拾物",
+                        "url": SITE_DOMAIN + '/mine/found',
+                    },
+                    {
+                        "type": "view",
                         "name": "帮助",
-                        "key": event_keys['help'],
-                    },
-                    {
-                        "type": "click",
-                        "name": "我的",
-                        "key": event_keys['mine'],
+                        "url": SITE_DOMAIN + '/help',
                     }
                 ]
             }

@@ -24,7 +24,8 @@ class Lost(models.Model):
     lostPlace = models.CharField(max_length=128)
     reward = models.CharField(max_length=128)
     user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
-    status = models.IntegerField()
+    picUrl = models.CharField(max_length=256, default=None)
+    status = models.IntegerField(default=0)
 
 
 class Found(models.Model):
@@ -32,11 +33,11 @@ class Found(models.Model):
     key = models.CharField(max_length=64, db_index=True)
     contact = models.CharField(max_length=128)
     description = models.TextField()
-    lostTime = models.DateTimeField(db_index=True)
-    lostPlace = models.CharField(max_length=128)
-    reward = models.CharField(max_length=128)
+    foundTime = models.DateTimeField(db_index=True)
+    foundPlace = models.CharField(max_length=128)
     user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
-    status = models.IntegerField()
+    picUrl = models.CharField(max_length=256, default=None)
+    status = models.IntegerField(default=0)
 
 
 '''
