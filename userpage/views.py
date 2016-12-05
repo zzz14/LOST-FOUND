@@ -20,6 +20,8 @@ class FoundList(APIView):
             temp['description'] = found.description
             temp['foundTime'] = found.foundTime
             temp['foundPlace'] = found.foundPlace
+            temp['lng'] = found.longitude
+            temp['lat'] = found.latitude
             temp['picUrl'] = found.picUrl
             items.append(temp)
         return items
@@ -36,6 +38,8 @@ class LostList(APIView):
             temp['description'] = lost.description
             temp['lostTime'] = lost.lostTime
             temp['lostPlace'] = lost.lostPlace
+            temp['lng'] = lost.longitude
+            temp['lat'] = lost.latitude
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
             items.append(temp)
@@ -44,7 +48,7 @@ class LostList(APIView):
 # 学校失物招领处失物列表
 # 内容还没写
 class SchoolOfficeLostList(APIView):
-    def get(self):
+    def post(self):
         return
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
@@ -60,6 +64,8 @@ class MineLost(APIView):
             temp['description'] = lost.description
             temp['lostTime'] = lost.lostTime
             temp['lostPlace'] = lost.lostPlace
+            temp['lng'] = lost.longitude
+            temp['lat'] = lost.latitude
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
             items.append(temp)
@@ -78,6 +84,8 @@ class MineFound(APIView):
             temp['description'] = found.description
             temp['foundTime'] = found.foundTime
             temp['foundPlace'] = found.foundPlace
+            temp['lng'] = found.longitude
+            temp['lat'] = found.latitude
             temp['picUrl'] = found.picUrl
             items.append(temp)
         return items
@@ -104,8 +112,10 @@ class FoundDetail(APIView):
         temp['key'] = found.key
         temp['contact'] = found.contact
         temp['description'] = found.description
-        temp['lostTime'] = found.lostTime
-        temp['lostPlace'] = found.lostPlace
+        temp['lostTime'] = found.foundTime
+        temp['lostPlace'] = found.foundPlace
+        temp['lng'] = found.longitude
+        temp['lat'] = found.latitude
         temp['picUrl'] = found.picUrl
         return temp
 
@@ -121,19 +131,23 @@ class LostDetail(APIView):
         temp['description'] = lost.description
         temp['lostTime'] = lost.lostTime
         temp['lostPlace'] = lost.lostPlace
+        temp['lng'] = lost.longitude
+        temp['lat'] = lost.latitude
         temp['reward'] = lost.reward
         temp['picUrl'] = lost.picUrl
         return temp
 
 # 新建失物信息的界面
 class NewLost(APIView):
-    def get(self):
+    def post(self):
         lost = Lost(name=self.input['name'],
                     key=self.input['key'],
                     description=self.input['description'],
                     contact=self.input['contact'],
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
+                    longitude=self.input['lng'],
+                    latitude=self.input['lat'],
                     reward=self.input['reward'],
                     user=self.input['user'],
                     picUrl=self.input['picUrl'],
@@ -142,13 +156,15 @@ class NewLost(APIView):
 
 # 新建拾物信息的界面
 class NewFound(APIView):
-    def get(self):
+    def post(self):
         found = Found(name=self.input['name'],
                       key=self.input['key'],
                       description=self.input['description'],
                       contact=self.input['contact'],
                       foundTime=self.input['foundTime'],
                       foundPlace=self.input['foundPlace'],
+                      longitude=self.input['lng'],
+                      latitude=self.input['lat'],
                       user=self.input['user'],
                       picUrl=self.input['picUrl'],
                       status=0)
