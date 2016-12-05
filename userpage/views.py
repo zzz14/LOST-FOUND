@@ -24,6 +24,25 @@ class FoundList(APIView):
             items.append(temp)
         return items
 
+class FoundListSearch(APIView):
+    def get(self):
+        items = []
+        for found in Found.objects.get(status=0):
+            searchWord = self.input['Content']
+            temp = {}
+            temp['name'] = found.name
+            temp['key'] = found.key
+            temp['contact'] = found.contact
+            temp['description'] = found.description
+            temp['foundTime'] = found.foundTime
+            temp['foundPlace'] = found.foundPlace
+            temp['picUrl'] = found.picUrl
+            #暂时先考虑一个关键字，之后再进行修改
+            #对内容描述暂不考虑 之后再写
+            if searchWord.decode('utf-8') == temp['key'].decode('utf-8'):
+                items.append(temp)
+        return items
+
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
 class LostList(APIView):
     def get(self):
