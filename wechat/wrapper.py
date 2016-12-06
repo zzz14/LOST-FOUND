@@ -87,7 +87,7 @@ class WeChatHandler(object):
         return settings.get_url('u/help')
 
     def url_bind(self):
-        return settings.get_url('u/bind', {'openid': self.user.open_id})
+        return settings.get_url('u/new', {'openid': self.user.open_id})
 
 
 class WeChatEmptyHandler(WeChatHandler):
@@ -173,7 +173,7 @@ class WeChatLib(object):
     def get_wechat_jsapi_ticket(cls):
         if datetime.datetime.now() >= cls.jsapi_tocket_expire:
             at = cls.get_wechat_access_token()
-            print("at=%s" %(at))
+            print("access token=%s" %(at))
             res = cls._http_get(
                 'https://api.weixin.qq.com/cgi-bin/getticket?access_token=%s&type=jsapi' % (at)
             )

@@ -38,8 +38,11 @@
 </script>
 
 <script type="text/template" id="tpl-mainbody">
+    {% if items %}
+
+    {% endif %}
 {% for item in items %}
-    <div href="">
+    <div class="item-block" id="item-{{ item.id }}">
     <span>{{ item.name }}</span>
     <span>{{ item.lostPlace }}</span>
     </div>
@@ -51,7 +54,6 @@
 <script src="/3rd/swig.js"></script>
 <script src="/js/weixin_lib.js"></script>
 <script src="/js/base.js"></script>
-<script src="/js/details.js"></script>
 
 <script>
     var locals = {};
@@ -67,6 +69,13 @@
             locals.items = data;
         }, dftFail);
     });
+    $(".item").click(function () {
+        var strs = this.attr("id").split('-');
+        if(strs.length == 2){
+            window.location.href = "/u/found/detail?id="+strs[1];
+        }
+    })
+
 </script>
 </body>
 </html>
