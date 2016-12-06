@@ -12,8 +12,9 @@ from LostAndFound.settings import CONFIGS
 class FoundList(APIView):
     def get(self):
         items = []
-        for found in Found.objects.get(status=0):
+        for found in Found.objects.filter(status=0):
             temp = {}
+            temp['id'] = found.id
             temp['name'] = found.name
             temp['key'] = found.key
             temp['contact'] = found.contact
@@ -24,14 +25,16 @@ class FoundList(APIView):
             temp['lat'] = found.latitude
             temp['picUrl'] = found.picUrl
             items.append(temp)
+        items.sort(key=lambda x: x["foundTime"])
         return items
 
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
 class LostList(APIView):
     def get(self):
         items = []
-        for lost in Lost.objects.get(status=0):
+        for lost in Lost.objects.filter(status=0):
             temp = {}
+            temp['id'] = lost.id
             temp['name'] = lost.name
             temp['key'] = lost.key
             temp['contact'] = lost.contact
@@ -43,6 +46,7 @@ class LostList(APIView):
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
             items.append(temp)
+        items.sort(key=lambda x: x["lostTime"])
         return items
 
 # 学校失物招领处失物列表
@@ -56,8 +60,9 @@ class SchoolOfficeLostList(APIView):
 class MineLost(APIView):
     def get(self):
         items = []
-        for lost in Lost.objects.get(user=self.input['user'], status=0):
+        for lost in Lost.objects.filter(user=self.input['user'], status=0):
             temp = {}
+            temp['id'] = lost.id
             temp['name'] = lost.name
             temp['key'] = lost.key
             temp['contact'] = lost.contact
@@ -69,6 +74,7 @@ class MineLost(APIView):
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
             items.append(temp)
+        items.sort(key=lambda x: x["lostTime"])
         return items
 
 # “我的拾物”界面，列表中系显示我发出且未删除的拾物信息
@@ -76,8 +82,9 @@ class MineLost(APIView):
 class MineFound(APIView):
     def get(self):
         items = []
-        for found in Found.objects.get(user=self.input['user'], status=0):
+        for found in Found.objects.filter(user=self.input['user'], status=0):
             temp = {}
+            temp['id'] = found.id
             temp['name'] = found.name
             temp['key'] = found.key
             temp['contact'] = found.contact
@@ -88,6 +95,7 @@ class MineFound(APIView):
             temp['lat'] = found.latitude
             temp['picUrl'] = found.picUrl
             items.append(temp)
+        items.sort(key=lambda x: x["foundTime"])
         return items
 
 # 删除我发布的失物信息
