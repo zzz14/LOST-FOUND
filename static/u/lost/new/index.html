@@ -3,8 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="/css/base.css" rel="stylesheet" type="text/css" />
-    <link href="/css/validation.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/css/weui.css"/>
     <title>绑定学号 - 紫荆之声</title>
 </head>
 <body>
@@ -53,10 +52,27 @@
         <input type="text" name="contacts" id="contacts" value="" placeholder="联系人" />
         <span class="spa spa4"></span><br />
 
-        <button type="button" id="uploadPic" onclick="m_chooseImage()">上传图片</button>
+        <!-- 图片上传 -->
+        <ul class="weui_uploader_files js_previews" id="uploaderFiles">
+                <!-- 预览图插入到这 -->
+        </ul>
+        <div class="weui-uploader__input-box">
+            <input id="uploadPic" class="weui-uploader__input" onclick="m_chooseImage()" multiple />
+        </div>
 
         <button id="loginnow" type="submit" class="btn btn-block btn-primary">提交</button>
     </form>
+
+    <div class="weui-gallery" id="gallery">
+        <span class="weui-gallery__img" id="galleryImg" onclick="m_backFromPreview()"></span>
+        <div class="weui-gallery__opr">
+            <a href="javascript:" class="weui-gallery__del">
+                <i class="weui-icon-delete weui-icon_gallery-delete" onclick="m_deleteImage()"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
     {% endif %}
 </script>
 
@@ -75,6 +91,7 @@
         $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
         $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+
     };
     $(function () {
         render();
@@ -129,6 +146,9 @@
                 success: function (res) {
                     locals.image.serverId = res.serverId;
                     alert('上传成功');
+                    tmpl = '<li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url('+locals.image.localId+')"></li>';
+                    $("#uploaderFiles").append($(tmpl));
+                    $(".weui-uploader__input-box").hide();
                 },
                 fail: function (res) {
                     alert(JSON.stringify(res));
@@ -136,6 +156,30 @@
             });
         }
     };
+
+    var m_previewImage = function () {
+        alert($(".weui-uploader__file").attr("style"));
+        $("#galleryImg").attr("style", $(".weui-uploader__file").attr("style"));
+        $("#gallery").fadeIn(100);
+    }
+
+    var m_backFromPreview = function () {
+        $("#gallery").fadeOut(100);
+    }
+
+    var m_deleteImage = function () {
+        if (locals.image.localId == undefined) {
+            alert('未选择图片');
+            return;
+        } else {
+            locals.image.localId = undefined;
+            locals.image.serverId = undefined;
+            $("#gallery").fadeOut(100);
+            $(".weui-uploader__file").remove();
+            $(".weui-uploader__input-box").show();
+        }
+    }
+    
 </script>
 
 </body>
