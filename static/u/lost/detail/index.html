@@ -4,8 +4,8 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="/css/base.css" rel="stylesheet" type="text/css" />
-    <link href="/css/details.css" rel="stylesheet" type="text/css" />
-    <title>活动详情 - 紫荆之声</title>
+    <link href="/css/ticket.css" rel="stylesheet" type="text/css" />
+    <title>我的电子票 - 紫荆之声</title>
 </head>
 <body>
 <div id="wrap">
@@ -30,26 +30,35 @@
 </script>
 
 <script type="text/template" id="tpl-theme">
-<a href="/u/lost/new">new lost</a>
+    {% if ticket %}
+        “{{ ticket.activityName }}”电子票
+    {% else %}
+        正在载入……
+    {% endif %}
 </script>
 
 <script type="text/template" id="tpl-mainbody">
-    {% if items %}
-{% for item in items %}
-    <div class="item-block" id="item-{{ item.id }}">
-    <span>{{ item.name }}</span>
-    <span>{{ item.lostPlace }}</span>
+{% if found %}
+    <div id="item-detail">
+    <image href="{{ found.picUrl }}"/>
+    <p>失物名称：{{ found.name }}</p>
+    <br />
+    <p>失物描述：{{ found.description }}</p>
+    <br />
+    <p>联系方式：{{ found.contact }}</p>
+    <br />
+    <p>丢失地点：{{ found.lostPlace }}</p>
     </div>
-{% endfor %}
-{% else %}
-没有拾物
 {% endif %}
 </script>
 
 <script src="/3rd/jquery.js"></script>
 <script src="/3rd/swig.js"></script>
+<script src="/3rd/qrcode.js"></script>
 <script src="/js/weixin_lib.js"></script>
 <script src="/js/base.js"></script>
+<script src="/js/ticket.js"></script>
+
 
 <script>
     var locals = {};
@@ -59,19 +68,12 @@
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
     };
     $(function () {
-        swig.setDefaultTZOffset(new Date().getTimezoneOffset());
         render();
-        api.get('/api/u/lost/list', {}, function (data) {
-            locals.items = data;
+        api.get('/api/u/lost/detail', {id: urlParam.id}, function (data) {
+            locals.found = data;
+            render();
         }, dftFail);
     });
-    $(".item").click(function () {
-        var strs = this.attr("id").split('-');
-        if(strs.length == 2){
-            window.location.href = "/u/found/detail?id="+strs[1];
-        }
-    })
-
 </script>
 </body>
 </html>
