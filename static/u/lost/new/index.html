@@ -20,7 +20,7 @@
         <div class="weui-cells">
             <div class="weui-cell">
                 <div class="weui-cell__bd">
-                    <input class="weui-input" type="text" name="itemName" id="itemName" placeholder="请输入名称"/>
+                    <input class="weui-input form-new-lost-input" type="text" name="itemName" id="itemName" placeholder="请输入名称" {% if locals.itemName %} value="{{ locals.itemName }}" {% endif %}/>
                 </div>
             </div>
         </div>
@@ -29,7 +29,7 @@
         <div class="weui-cells weui-cells_form">
             <div class="weui-cell">
                 <div class="weui-cell__bd">
-                    <textarea class="weui-textarea" name="itemDescription" id="itemDescription" placeholder="请输入描述" rows="3"></textarea>
+                    <textarea class="weui-textarea form-new-lost-input" name="itemDescription" id="itemDescription" placeholder="请输入描述" rows="3">{% if locals.itemDescription %} {{ locals.itemDescription }} {% endif %}</textarea>
                     <div class="weui-textarea-counter"><span>0</span>/200</div>
                 </div>
             </div>
@@ -39,7 +39,7 @@
         <div class="weui-cells">
             <div class="weui-cell">
                 <div class="weui-cell__bd">
-                    <input class="weui-input" type="text" name="contacts" id="contacts" placeholder="请输入联系人"/>
+                    <input class="weui-input form-new-lost-input" type="text" name="contacts" id="contacts" placeholder="请输入联系人" {% if locals.contacts %} value="{{ locals.contacts }}" {% endif %}/>
                 </div>
             </div>
         </div>
@@ -49,14 +49,14 @@
 
             <div class="weui-cell weui-cell_select weui-cell_select-before">
                 <div class="weui-cell__hd">
-                    <select class="weui-select" name="select2">
+                    <select class="weui-select form-new-lost-input" name="contactType">
                         <option value="1">微信号</option>
                         <option value="2">手机号</option>
                         <option value="3">email</option>
                     </select>
                 </div>
                 <div class="weui-cell__bd">
-                    <input class="weui-input" name="contactNumber" id="contactNumber" placeholder="联系方式"/>
+                    <input class="weui-input form-new-lost-input" name="contactNumber" id="contactNumber" placeholder="联系方式" {% if locals.contactNumber %} value="{{ locals.contactNumber }}" {% endif %}/>
                 </div>
             </div>
         </div>
@@ -66,13 +66,13 @@
             <div class="weui-cell">
                 <div class="weui-cell__hd"><label for="" class="weui-label">丢失日期</label></div>
                 <div class="weui-cell__bd">
-                    <input class="weui-input" type="date" value=""/>
+                    <input class="weui-input form-new-lost-input" type="date" name="lostTime" {% if locals.lostTime %} value="{{ locals.lostTime }}" {% endif %}/>
                 </div>
             </div>
             <a class="weui-cell weui-cell_access" href="javascript:;">
                 <div class="weui-cell__hd"><label class="weui-label">丢失地点</label></div>
                 <div class="weui-cell__bd">
-                    <p id="itemPlace" onclick="m_setPlace()">不限</p>
+                    <p class="form-new-lost-input" id="lostPlace" name="lostPlace" onclick="m_setPlace()">{% if locals.lostPlace %} {{ locals.lostPlace }} {% else %} 不限 {% endif %}</p>
                 </div>
                 <div class="weui-cell__ft">
                 </div>
@@ -80,7 +80,7 @@
             <div class="weui-cell">
                 <div class="weui-cell__hd"><label class="weui-label">酬金</label></div>
                 <div class="weui-cell__bd">
-                    <input class="weui-input" type="number" pattern="[0-9]*" placeholder="0"/>
+                    <input class="weui-input form-new-lost-input" type="number" name="reward" id="reward" pattern="[0-9]*" placeholder="0" {% if locals.reward %} value="{{ locals.reward }}" {% endif %}/>
                 </div>
             </div>
         </div>
@@ -155,45 +155,21 @@
     var render = function () {
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
         $('#map').html("");
+        $(".form-new-lost-input").change(function () {
+            var input_name = $(this).attr('name');
+            eval("locals."+input_name+"=$(this).val()");
+            //alert(eval("locals."+input_name));
+        });
     };
     var renderMap = function () {
         $('#mainbody').html("");
         $('#map').html(swig.render($('#tpl-map').html(), {locals: locals}));
-    }
-    $(function () {
-        render();
-        api.get('/api/u/wx/config', {url:location.href}, function (data) {
-            locals.appId = data.appId;
-            locals.timestamp = data.timestamp;
-            locals.nonceStr = data.nonceStr;
-            locals.signature = data.signature;
-            wx.config({
-                debug: true,
-                appId: locals.appId,
-                timestamp: locals.timestamp,
-                nonceStr: locals.nonceStr,
-                signature: locals.signature,
-                jsApiList: [
-                    'chooseImage',
-                    'uploadImage'
-                ]
-            });
-            wx.ready(function () {
-                alert('config success');
-            });
-            wx.error(function (res) {
-                alert(JSON.stringify(res));
-            });
-        }, dftFail);
-    });
-
-    var initMap = function () {
         maps.map = new BMap.Map("l-map");
         maps.ac = new BMap.Autocomplete({
                 "input" : "suggestId",
                 "location" : maps.map
             });
-        maps.map.centerAndZoom("清华大学",18);                   // 初始化地图,设置城市和地图级别。
+      //  maps.map.centerAndZoom("清华大学",18);                   // 初始化地图,设置城市和地图级别。
 
         var geolocation = new BMap.Geolocation();
         geolocation.getCurrentPosition(function(r){
@@ -242,15 +218,44 @@
         });
 
         $("#map-ok").click(function () {
+
             var p = maps.marker.getPosition();
             locals.place.lng = p.lng;
             locals.place.lat = p.lat;
             locals.place.poi = $("#suggestId").val();
-            alert(locals.image.localId);
+           // alert(locals.image.localId);
             render();
-            $("#itemPlace").html(locals.place.poi);
+            maps = {};
+            $("#lostPlace").html(locals.place.poi);
         });
-    };
+    }
+    $(function () {
+        render();
+        api.get('/api/u/wx/config', {url:location.href}, function (data) {
+            locals.appId = data.appId;
+            locals.timestamp = data.timestamp;
+            locals.nonceStr = data.nonceStr;
+            locals.signature = data.signature;
+            wx.config({
+                debug: false,
+                appId: locals.appId,
+                timestamp: locals.timestamp,
+                nonceStr: locals.nonceStr,
+                signature: locals.signature,
+                jsApiList: [
+                    'chooseImage',
+                    'uploadImage'
+                ]
+            });
+            wx.ready(function () {
+              //  alert('config success');
+            });
+            wx.error(function (res) {
+              //  alert(JSON.stringify(res));
+            });
+        }, dftFail);
+    });
+
 
     function G(id) {
         return document.getElementById(id);
@@ -267,7 +272,7 @@
                 //maps.map.addOverlay(marker);    //添加标注
             }
 		});
-        alert(myValue);
+      //  alert(myValue);
 		local.search(myValue);
     }
 
@@ -277,12 +282,12 @@
             sizeType: ['compressed'],
             sourceType: ['album', 'camera'],
             success: function (res) {
-                alert('choose success');
+           //     alert('choose success');
                 locals.image.localId = res.localIds[0];
                 setTimeout(m_uploadImage,100);
             },
             fail: function (res) {
-                alert(JSON.stringify(res));
+            //    alert(JSON.stringify(res));
             }
         });
     };
@@ -303,14 +308,14 @@
                     render();
                 },
                 fail: function (res) {
-                    alert(JSON.stringify(res));
+                //    alert(JSON.stringify(res));
                 }
             });
         }
     };
 
     var m_previewImage = function () {
-        alert($(".weui-uploader__file").attr("style"));
+    //    alert($(".weui-uploader__file").attr("style"));
         $("#galleryImg").attr("style", $(".weui-uploader__file").attr("style"));
         $("#galleryImg-div").fadeIn(100);
     }
@@ -335,8 +340,9 @@
     
     var m_setPlace = function () {
         renderMap();
-        initMap();
     };
+
+
 
 
 
