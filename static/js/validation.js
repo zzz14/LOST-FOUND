@@ -122,7 +122,7 @@ function submitValidation(openid, success, fail) {
                 data[elems[i].name] = elems[i].value;
             }
         }
-        api.post('/api/u/user/bind', data, success, fail);
+        api.post('/api/u/user/new', data, success, fail);
     }
     return false;
 }

@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^school_office/list/?$', SchoolOfficeLostList.as_view()),
     url(r'^mine/lost/?$', MineLost.as_view()),
     url(r'^mine/found/?$', MineFound.as_view()),
-    url(r'^mine/lost/delete/?$', DeleteMineLost),
-    url(r'^mine/found/delete/?$', DeleteMineFound),
+    url(r'^mine/lost/delete/?$', DeleteMineLost.as_view()),
+    url(r'^mine/found/delete/?$', DeleteMineFound.as_view()),
+    url(r'^wx/config/?$',WxConfig.as_view())
 ]

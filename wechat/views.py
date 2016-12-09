@@ -21,12 +21,12 @@ class CustomWeChatView(WeChatView):
             {
                 "type": "view",
                 "name": "丢了东西",
-                "url": SITE_DOMAIN + '/lost/list',
+                "url": SITE_DOMAIN + '/u/lost/list',
             },
             {
                 "type": "view",
                 "name": "捡了东西",
-                "url": SITE_DOMAIN + '/found/list',
+                "url": SITE_DOMAIN + '/u/found/list',
             },
             {
                 "name": "其他",
@@ -34,22 +34,22 @@ class CustomWeChatView(WeChatView):
                     {
                         "type": "view",
                         "name": "失物招领处",
-                        "url": SITE_DOMAIN + '/school_office/list',
+                        "url": SITE_DOMAIN + '/u/school_office/list',
                     },
                     {
                         "type": "view",
                         "name": "我的失物",
-                        "url": SITE_DOMAIN + '/mine/lost',
+                        "url": SITE_DOMAIN + '/u/mine/lost',
                     },
                     {
                         "type": "view",
                         "name": "我的拾物",
-                        "url": SITE_DOMAIN + '/mine/found',
+                        "url": SITE_DOMAIN + '/u/mine/found',
                     },
                     {
                         "type": "view",
                         "name": "帮助",
-                        "url": SITE_DOMAIN + '/help',
+                        "url": SITE_DOMAIN + '/u/help',
                     }
                 ]
             }
