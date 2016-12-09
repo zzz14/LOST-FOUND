@@ -30,7 +30,7 @@ class FoundList(APIView):
         items.sort(key=lambda x: x["foundTime"])
         return items
 
-<<<<<<< HEAD
+
 class FoundListSearch(APIView):
     def get(self):
         items = []
@@ -49,8 +49,7 @@ class FoundListSearch(APIView):
             if searchWord.decode('utf-8') == temp['key'].decode('utf-8'):
                 items.append(temp)
         return items
-=======
->>>>>>> master
+
 
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
 class LostList(APIView):
@@ -221,8 +220,6 @@ class uploadImage(APIView):
         path = default_storage.save(settings.STATIC_ROOT + picUrl, ContentFile(data.read()))
         os.path.join(settings.MEDIA_ROOT, path)
         return CONFIGS['SITE_DOMAIN'] + picUrl
-<<<<<<< HEAD
-=======
 
 
 class WxConfig(APIView):
@@ -230,4 +227,3 @@ class WxConfig(APIView):
         config = WeChatLib.get_wechat_wx_config(self.input['url'])
         return config
 
->>>>>>> master
