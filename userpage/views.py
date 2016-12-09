@@ -7,7 +7,8 @@ from django.conf import settings
 from wechat.models import Lost, Found, User
 from LostAndFound.settings import CONFIGS
 from wechat.wrapper import WeChatLib
-
+#分词
+from jieba import jieba
 
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
 # 按界面设计，这里似乎应该删去key，contact，reward这些值
@@ -30,10 +31,14 @@ class FoundList(APIView):
         items.sort(key=lambda x: x["foundTime"])
         return items
 
-
+#失物找领列表的搜索
 class FoundListSearch(APIView):
+    def divKey(self):
+        {key: value for key, value in variable}
+
     def get(self):
         items = []
+        keys = []
         for found in Found.objects.get(status=0):
             searchWord = self.input['Content']
             temp = {}
@@ -48,7 +53,10 @@ class FoundListSearch(APIView):
             #对内容描述暂不考虑 之后再写
             if searchWord.decode('utf-8') == temp['key'].decode('utf-8'):
                 items.append(temp)
-        return items
+        result = []
+        result['data'] = keys
+        result['items'] = items
+        return result
 
 
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
@@ -226,4 +234,3 @@ class WxConfig(APIView):
     def get(self):
         config = WeChatLib.get_wechat_wx_config(self.input['url'])
         return config
-
