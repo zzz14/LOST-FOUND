@@ -1,13 +1,16 @@
+from urllib.request import Request
+
 from codex.baseerror import *
-from codex.baseview import APIView
 import os
+
+from codex.baseview import APIView
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 from wechat.models import Lost, Found, User
 from LostAndFound.settings import CONFIGS
+import urllib.request
 from wechat.wrapper import WeChatLib
-
 
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
 # 按界面设计，这里似乎应该删去key，contact，reward这些值
@@ -16,15 +19,13 @@ class FoundList(APIView):
         items = []
         for found in Found.objects.filter(status=0):
             temp = {}
-            temp['id'] = found.id
             temp['name'] = found.name
-            temp['key'] = found.key
-            temp['contact'] = found.contact
+            temp['contacts'] = found.contacts
+            temp['contactNumber'] = found.contactNumber
+            temp['contactType'] = found.contactType
             temp['description'] = found.description
             temp['foundTime'] = found.foundTime
             temp['foundPlace'] = found.foundPlace
-            temp['lng'] = found.longitude
-            temp['lat'] = found.latitude
             temp['picUrl'] = found.picUrl
             items.append(temp)
         items.sort(key=lambda x: x["foundTime"])
@@ -37,15 +38,13 @@ class LostList(APIView):
         items = []
         for lost in Lost.objects.filter(status=0):
             temp = {}
-            temp['id'] = lost.id
             temp['name'] = lost.name
-            temp['key'] = lost.key
-            temp['contact'] = lost.contact
+            temp['contacts'] = lost.contacts
+            temp['contactNumber'] = lost.contactNumber
+            temp['contactType'] = lost.contactType
             temp['description'] = lost.description
             temp['lostTime'] = lost.lostTime
             temp['lostPlace'] = lost.lostPlace
-            temp['lng'] = lost.longitude
-            temp['lat'] = lost.latitude
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
             items.append(temp)
@@ -67,15 +66,13 @@ class MineLost(APIView):
         items = []
         for lost in Lost.objects.filter(user=self.input['user'], status=0):
             temp = {}
-            temp['id'] = lost.id
             temp['name'] = lost.name
-            temp['key'] = lost.key
-            temp['contact'] = lost.contact
+            temp['contacts'] = lost.contacts
+            temp['contactNumber'] = lost.contactNumber
+            temp['contactType'] = lost.contactType
             temp['description'] = lost.description
             temp['lostTime'] = lost.lostTime
             temp['lostPlace'] = lost.lostPlace
-            temp['lng'] = lost.longitude
-            temp['lat'] = lost.latitude
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
             items.append(temp)
@@ -88,17 +85,15 @@ class MineLost(APIView):
 class MineFound(APIView):
     def get(self):
         items = []
-        for found in Found.objects.filter(user=self.input['user'], status=0):
+        for found in Found.objects.filter(status=0):
             temp = {}
-            temp['id'] = found.id
             temp['name'] = found.name
-            temp['key'] = found.key
-            temp['contact'] = found.contact
+            temp['contacts'] = found.contacts
+            temp['contactNumber'] = found.contactNumber
+            temp['contactType'] = found.contactType
             temp['description'] = found.description
             temp['foundTime'] = found.foundTime
             temp['foundPlace'] = found.foundPlace
-            temp['lng'] = found.longitude
-            temp['lat'] = found.latitude
             temp['picUrl'] = found.picUrl
             items.append(temp)
         items.sort(key=lambda x: x["foundTime"])
@@ -126,13 +121,12 @@ class FoundDetail(APIView):
         found = Found.objects.get(id=self.input('id'))
         temp = {}
         temp['name'] = found.name
-        temp['key'] = found.key
         temp['contact'] = found.contact
+        temp['contactType'] = found.contactType
+        temp['contactNumber'] = found.contactNumber
         temp['description'] = found.description
         temp['lostTime'] = found.foundTime
         temp['lostPlace'] = found.foundPlace
-        temp['lng'] = found.longitude
-        temp['lat'] = found.latitude
         temp['picUrl'] = found.picUrl
         return temp
 
@@ -144,33 +138,46 @@ class LostDetail(APIView):
         lost = Lost.objects.get(id=self.input('id'))
         temp = {}
         temp['name'] = lost.name
-        temp['key'] = lost.key
-        temp['contact'] = lost.contact
+        temp['contacts'] = lost.contacts
+        temp['contactNumber'] = lost.contactNumber
+        temp['contactType'] = lost.contactType
         temp['description'] = lost.description
         temp['lostTime'] = lost.lostTime
         temp['lostPlace'] = lost.lostPlace
-        temp['lng'] = lost.longitude
-        temp['lat'] = lost.latitude
-        temp['reward'] = lost.reward
         temp['picUrl'] = lost.picUrl
+        temp['reward'] = lost.reward
         return temp
 
 
 # 新建失物信息的界面
 class NewLost(APIView):
     def post(self):
+        self.check_input('name', 'contacts', 'contactType', 'contactNumber',\
+                         'description', 'lostTime', 'lostPlace', 'reward')
         lost = Lost(name=self.input['name'],
-                    key=self.input['key'],
                     description=self.input['description'],
                     contact=self.input['contact'],
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
-                    longitude=self.input['lng'],
-                    latitude=self.input['lat'],
                     reward=self.input['reward'],
                     user=self.input['user'],
-                    picUrl=self.input['picUrl'],
                     status=0)
+        if 'lng' in self.input:
+            lost.longitude = self.input['lng']
+        if 'lat' in self.input:
+            lost.latitude = self.input['lat']
+        if 'media_id' in self.input:
+            url = "https://api.weixin.qq.com/cgi-bin/media"
+            getData = {}
+            getData['access_token'] = CONFIGS['WECHAT_TOKEN']
+            getData['media_id'] = self.input['media_id']
+            req = Request(url=url, data=getData)
+            f = urllib.request.urlopen(req, timeout=120)
+            picUrl = '/img/lostAndFound/' + str(
+            len(os.listdir(settings.STATIC_ROOT + '/img/lostAndFound/'))) + '_' + data.name
+            path = default_storage.save(settings.STATIC_ROOT + picUrl, ContentFile(data.read()))
+            os.path.join(settings.MEDIA_ROOT, path)
+            return CONFIGS['SITE_DOMAIN'] + picUrl
         lost.save()
 
 
@@ -190,20 +197,11 @@ class NewFound(APIView):
                       status=0)
         found.save()
 
-
 # 图片上传
 class uploadImage(APIView):
     def post(self):
-        data = self.request.FILES['image']
-        picUrl = '/img/lostAndFound/' + str(
-            len(os.listdir(settings.STATIC_ROOT + '/img/lostAndFound/'))) + '_' + data.name
+        data = self.input['image_id']
+        picUrl = '/img/lostAndFound/' + str(len(os.listdir(settings.STATIC_ROOT+'/img/lostAndFound/'))) + '_' + data.name
         path = default_storage.save(settings.STATIC_ROOT + picUrl, ContentFile(data.read()))
         os.path.join(settings.MEDIA_ROOT, path)
         return CONFIGS['SITE_DOMAIN'] + picUrl
-
-
-class WxConfig(APIView):
-    def get(self):
-        config = WeChatLib.get_wechat_wx_config(self.input['url'])
-        return config
-

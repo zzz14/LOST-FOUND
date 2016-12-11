@@ -1,11 +1,9 @@
 from django.db import models
-
 from codex.baseerror import LogicError
 
 
 class User(models.Model):
     open_id = models.CharField(max_length=64, unique=True, db_index=True)
-    student_id = models.CharField(max_length=32, unique=True, db_index=True)
 
     @classmethod
     def get_by_openid(cls, openid):
@@ -18,7 +16,9 @@ class User(models.Model):
 class Lost(models.Model):
     name = models.CharField(max_length=128)
     key = models.CharField(max_length=64, db_index=True)
-    contact = models.CharField(max_length=128)
+    contacts = models.CharField(max_length=128)
+    contactType = models.CharField(max_length=128)
+    contactNumber = models.CharField(max_length=128)
     description = models.TextField()
     lostTime = models.DateTimeField(db_index=True)
     lostPlace = models.CharField(max_length=128)
@@ -33,7 +33,9 @@ class Lost(models.Model):
 class Found(models.Model):
     name = models.CharField(max_length=128)
     key = models.CharField(max_length=64, db_index=True)
-    contact = models.CharField(max_length=128)
+    contacts = models.CharField(max_length=128)
+    contactType = models.CharField(max_length=128)
+    contactNumber = models.CharField(max_length=128)
     description = models.TextField()
     foundTime = models.DateTimeField(db_index=True)
     foundPlace = models.CharField(max_length=128)
