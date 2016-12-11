@@ -11,11 +11,10 @@ from wechat.models import Lost, Found, User
 from LostAndFound.settings import CONFIGS
 import urllib.request
 from wechat.wrapper import WeChatLib
-<<<<<<< HEAD
+
 #分词
 from jieba import jieba
-=======
->>>>>>> master
+
 
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
 # 按界面设计，这里似乎应该删去key，contact，reward这些值
@@ -242,8 +241,5 @@ class uploadImage(APIView):
 class WxConfig(APIView):
     def get(self):
         config = WeChatLib.get_wechat_wx_config(self.input['url'])
-<<<<<<< HEAD
         return config
-=======
         return config
->>>>>>> master
