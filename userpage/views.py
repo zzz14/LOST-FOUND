@@ -205,3 +205,8 @@ class uploadImage(APIView):
         path = default_storage.save(settings.STATIC_ROOT + picUrl, ContentFile(data.read()))
         os.path.join(settings.MEDIA_ROOT, path)
         return CONFIGS['SITE_DOMAIN'] + picUrl
+
+class WxConfig(APIView):
+    def get(self):
+        config = WeChatLib.get_wechat_wx_config(self.input['url'])
+        return config
