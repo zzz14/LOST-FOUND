@@ -15,7 +15,6 @@ urlpatterns = [
     url(r'^found/list/?$', LostList.as_view()),
     url(r'^found/new/?$', NewFound.as_view()),
     url(r'^found/detail/?$', LostDetail.as_view()),
-    url(r'^image/upload/?$', uploadImage.as_view()),
     url(r'^school_office/list/?$', SchoolOfficeLostList.as_view()),
     url(r'^mine/lost/?$', MineLost.as_view()),
     url(r'^mine/found/?$', MineFound.as_view()),
