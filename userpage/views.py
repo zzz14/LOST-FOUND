@@ -13,7 +13,13 @@ import urllib.request
 from wechat.wrapper import WeChatLib
 
 #分词
-from jieba import jieba
+import sys
+sys.path.append('jieba/')
+import jieba
+import jieba.analyse
+jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
+jieba.set_dictionary('jieba/extra_dict/dict.txt.small')
+jieba.load_userdict("jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
 
 
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
@@ -37,13 +43,21 @@ class FoundList(APIView):
 
 #失物找领列表的搜索
 class FoundListSearch(APIView):
-    def divKey(self):
-        keyWord = jieba.cut(self.input['Content'])
-
+    def divKey(self, contact1):
+        count = 0
+        inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        contactKeyWord = list(jieba.analyse.extract_tags(content1, topK=25))
+        for item1 in contactKeyWord:
+            for item2 in inputKeyWord:
+                if item1 == item2:
+                    count = count + 1
+                    print(item1)
+        return count
 
     def get(self):
         items = []
-        keys = []
+        keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        result = []
         for found in Found.objects.get(status=0):
             searchWord = self.input['Content']
             temp = {}
@@ -54,13 +68,11 @@ class FoundListSearch(APIView):
             temp['foundTime'] = found.foundTime
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
-            #暂时先考虑一个关键字，之后再进行修改
-            #对内容描述暂不考虑 之后再写
-            if searchWord.decode('utf-8') == temp['key'].decode('utf-8'):
+            if self.divKey(found.contact) > 0:
                 items.append(temp)
-        result = []
-        result['data'] = keys
-        result['items'] = items
+                result['data'] = keys
+                result['items'] = items
+        items.sort(key=lambda x: x["foundTime"])
         return result
 
 
