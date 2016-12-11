@@ -18,7 +18,7 @@
     <form id="form-new-lost">
         <div class="weui-cells__title">物品名称</div>
         <div class="weui-cells">
-            <div class="weui-cell">
+            <div class="weui-cell" id="itemName-cell">
                 <div class="weui-cell__bd">
                     <input class="weui-input form-new-lost-input" type="text" name="itemName" id="itemName" placeholder="请输入名称" {% if locals.itemName %} value="{{ locals.itemName }}" {% endif %}/>
                 </div>
@@ -27,7 +27,7 @@
 
         <div class="weui-cells__title">物品描述</div>
         <div class="weui-cells weui-cells_form">
-            <div class="weui-cell">
+            <div class="weui-cell" id="itemDescription-cell">
                 <div class="weui-cell__bd">
                     <textarea class="weui-textarea form-new-lost-input" name="itemDescription" id="itemDescription" placeholder="请输入描述" rows="3">{% if locals.itemDescription %} {{ locals.itemDescription }} {% endif %}</textarea>
                     <div class="weui-textarea-counter"><span>0</span>/200</div>
@@ -37,7 +37,7 @@
 
         <div class="weui-cells__title">联系人</div>
         <div class="weui-cells">
-            <div class="weui-cell">
+            <div class="weui-cell" id="contacts-cell">
                 <div class="weui-cell__bd">
                     <input class="weui-input form-new-lost-input" type="text" name="contacts" id="contacts" placeholder="请输入联系人" {% if locals.contacts %} value="{{ locals.contacts }}" {% endif %}/>
                 </div>
@@ -47,12 +47,12 @@
         <div class="weui-cells__title">联系方式</div>
         <div class="weui-cells">
 
-            <div class="weui-cell weui-cell_select weui-cell_select-before">
+            <div class="weui-cell weui-cell_select weui-cell_select-before" id="contactNumber-cell">
                 <div class="weui-cell__hd">
-                    <select class="weui-select form-new-lost-input" name="contactType">
-                        <option value="1">微信号</option>
-                        <option value="2">手机号</option>
-                        <option value="3">email</option>
+                    <select class="weui-select form-new-lost-input" name="contactType" id="contactType">
+                        <option value="微信号">微信号</option>
+                        <option value="手机号">手机号</option>
+                        <option value="email">email</option>
                     </select>
                 </div>
                 <div class="weui-cell__bd">
@@ -80,7 +80,7 @@
             <div class="weui-cell">
                 <div class="weui-cell__hd"><label class="weui-label">酬金</label></div>
                 <div class="weui-cell__bd">
-                    <input class="weui-input form-new-lost-input" type="number" name="reward" id="reward" pattern="[0-9]*" placeholder="0" {% if locals.reward %} value="{{ locals.reward }}" {% endif %}/>
+                    <input class="weui-input form-new-lost-input" type="text" name="reward" id="reward" {% if locals.reward %} value="{{ locals.reward }}" {% endif %}/>
                 </div>
             </div>
         </div>
@@ -100,7 +100,7 @@
         </div>
 
         <div class="weui-btn-area">
-            <a class="weui-btn weui-btn_primary" href="javascript:" id="m_submit">确定</a>
+            <a class="weui-btn weui-btn_primary" href="javascript:" onclick="m_submit()">确定</a>
         </div>
     </form>
 
@@ -113,6 +113,38 @@
         </div>
     </div>
 
+ <!--BEGIN dialog3-->
+    <div class="js_dialog" id="successDialog" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog weui-skin_android">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title">创建成功</strong></div>
+            <div class="weui-dialog__bd">
+                <!-- TODO -->
+                弹窗内容，告知当前状态、信息和解决方法，描述文字尽量控制在三行内
+            </div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">继续修改</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">返回列表</a>
+            </div>
+        </div>
+    </div>
+        <!--END dialog3-->
+    <!--BEGIN dialog3-->
+    <div class="js_dialog" id="failDialog" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog weui-skin_android">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title">创建失败</strong></div>
+            <div class="weui-dialog__bd">
+                <!-- TODO -->
+                弹窗内容，告知当前状态、信息和解决方法，描述文字尽量控制在三行内
+            </div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">继续修改</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">返回列表</a>
+            </div>
+        </div>
+    </div>
+        <!--END dialog3-->
 
 </div>
 
@@ -218,15 +250,15 @@
         });
 
         $("#map-ok").click(function () {
-
-            var p = maps.marker.getPosition();
-            locals.place.lng = p.lng;
-            locals.place.lat = p.lat;
-            locals.place.poi = $("#suggestId").val();
+            if(maps.marker && $("suggestId").val() != "") {
+                var p = maps.marker.getPosition();
+                locals.lng = p.lng;
+                locals.lat = p.lat;
+                locals.lostPlace = $("#suggestId").val();
+            }
            // alert(locals.image.localId);
             render();
             maps = {};
-            $("#lostPlace").html(locals.place.poi);
         });
     }
     $(function () {
@@ -301,6 +333,7 @@
                 localId: locals.image.localId,
                 success: function (res) {
                     locals.image.serverId = res.serverId;
+                    alert(res.serverId);
                     alert('上传成功');
                     //tmpl = '<li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url('+locals.image.localId+')"></li>';
                     //$("#uploaderFiles").append($(tmpl));
@@ -342,9 +375,66 @@
         renderMap();
     };
 
-
-
-
+    var m_submit = function () {
+        var item = {};
+        var warningHtml = '<div class="weui-cell__ft warning-div"> <i class="weui-icon-warn"></i> </div>'
+        if(!locals.itemName) {
+            $("#itemName-cell").append(warningHtml);
+        } else {
+            item['name'] = locals.itemName;
+            $("#itemName-cell .warning-div").remove();
+        }
+        if(!locals.contactNumber){
+            $("#contactNumber-cell").append(warningHtml);
+        }else{
+            item['contactNumber'] = locals.contactNumber;
+            $("#contactNumber-cell .warning-div").remove();
+        }
+        //TODO: 描述的warning图标没有
+        if(!locals.itemDescription){
+            $("#itemDescription-cell").append(warningHtml);
+        }else {
+            item['description'] = locals.itemDescription;
+            $("#itemDescription-cell .warning-div").remove();
+        }
+        if(!locals.contacts){
+            $("#contacts-cell").append(warningHtml);
+        }else {
+            item['contacts'] = locals.contacts;
+            $("#contacts-cell .warning-div").remove();
+        }
+        if(!locals.lostTime){
+            item['lostTime'] = "不详";
+        }else {
+            item['lostTime'] = locals.lostTime;
+        }
+        if(!locals.lostPlace){
+            item['lostPlace'] = "不详";
+        }else {
+            item['lostPlace'] = locals.lostPlace;
+        }
+        if(!locals.reward){
+            item['reward'] = "无";
+        }else {
+            item['reward'] = locals.reward;
+        }
+        if(locals.lng) item['lng'] = locals.lng;
+        if(locals.lat) item['lat'] = locals.lat;
+        if(locals.image.serverId) item['media_id'] = locals.image.serverId;
+        item['contactType'] = $("#contactType").val();
+        if (item['name']
+                && item['description']
+                && item['contactType']
+                && item['contacts']
+                && item['contactNumber']) {
+            api.post('/u/lost/new',item,function (data) {
+                $("#successDialog").fadeIn(100);
+            }, function (errno, errmsg, e) {
+                $("#failDialogDialog .weui-cell .weui-cell__bd").val("["+errno+"]:"+errmsg);
+                $("#failDialog").fadeIn(100);
+            });
+        }
+    }
 
 </script>
 
