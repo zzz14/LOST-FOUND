@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="/css/base.css" rel="stylesheet" type="text/css" />
+    <link href="/css/ticket.css" rel="stylesheet" type="text/css" />
+    <title>我的电子票 - 紫荆之声</title>
+</head>
+<body>
+<div id="wrap">
+    <header></header>
+
+    <div class="theme" id="theme"></div>
+
+    <hr/>
+    <div id="mainbody"></div>
+
+</div>
+<footer id="footer">
+    <hr />
+    <a href="http://www.xuetangx.com/" target="_blank">学堂在线</a>
+    <a href="http://www.tsinghua.edu.cn/" target="_blank">清华大学</a>
+    <a href="https://github.com/ThssSE" target="_blank">软件工程</a><br>
+    &copy; 2016
+</footer>
+
+<script type="text/template" id="tpl-header">
+    <img class="header-img" src="/img/logo.jpg" />
+</script>
+
+<script type="text/template" id="tpl-theme">
+    {% if ticket %}
+        “{{ ticket.activityName }}”电子票
+    {% else %}
+        正在载入……
+    {% endif %}
+</script>
+
+<script type="text/template" id="tpl-mainbody">
+{% if found %}
+    <div id="item-detail">
+    <image href="{{ found.picUrl }}"/>
+    <p>失物名称：{{ found.name }}</p>
+    <br />
+    <p>失物描述：{{ found.description }}</p>
+    <br />
+    <p>联系方式：{{ found.contact }}</p>
+    <br />
+    <p>丢失地点：{{ found.lostPlace }}</p>
+    </div>
+{% endif %}
+</script>
+
+<script src="/3rd/jquery.js"></script>
+<script src="/3rd/swig.js"></script>
+<script src="/3rd/qrcode.js"></script>
+<script src="/js/weixin_lib.js"></script>
+<script src="/js/base.js"></script>
+<script src="/js/ticket.js"></script>
+
+
+<script>
+    var locals = {};
+    var render = function () {
+        $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
+        $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
+        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+    };
+    $(function () {
+        render();
+        api.get('/api/u/found/detail', {id: urlParam.id}, function (data) {
+            locals.found = data;
+            render();
+        }, dftFail);
+    });
+</script>
+</body>
+</html>

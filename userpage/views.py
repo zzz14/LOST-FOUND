@@ -10,6 +10,7 @@ from django.conf import settings
 from wechat.models import Lost, Found, User
 from LostAndFound.settings import CONFIGS
 import urllib.request
+from wechat.wrapper import WeChatLib
 
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
 # 按界面设计，这里似乎应该删去key，contact，reward这些值
@@ -30,6 +31,7 @@ class FoundList(APIView):
         items.sort(key=lambda x: x["foundTime"])
         return items
 
+
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
 class LostList(APIView):
     def get(self):
@@ -49,11 +51,13 @@ class LostList(APIView):
         items.sort(key=lambda x: x["lostTime"])
         return items
 
+
 # 学校失物招领处失物列表
 # 内容还没写
 class SchoolOfficeLostList(APIView):
     def post(self):
         return
+
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
 # 前端须返回输入user
@@ -75,6 +79,7 @@ class MineLost(APIView):
         items.sort(key=lambda x: x["lostTime"])
         return items
 
+
 # “我的拾物”界面，列表中系显示我发出且未删除的拾物信息
 # 前端须返回输入user
 class MineFound(APIView):
@@ -94,17 +99,20 @@ class MineFound(APIView):
         items.sort(key=lambda x: x["foundTime"])
         return items
 
+
 # 删除我发布的失物信息
 # 需提供信息的id
 class DeleteMineLost(APIView):
     def get(self):
         Lost.objects.filter(id=self.input['id']).update(status=1);
 
+
 # 删除我发布的失物信息
 # 需提供信息的id
 class DeleteMineFound(APIView):
     def get(self):
         Found.objects.filter(id=self.input['id']).update(status=1);
+
 
 # 拾物详情页
 # 需提供拾物的id
@@ -122,6 +130,7 @@ class FoundDetail(APIView):
         temp['picUrl'] = found.picUrl
         return temp
 
+
 # 失物详情页
 # 需提供失物的id
 class LostDetail(APIView):
@@ -138,6 +147,7 @@ class LostDetail(APIView):
         temp['picUrl'] = lost.picUrl
         temp['reward'] = lost.reward
         return temp
+
 
 # 新建失物信息的界面
 class NewLost(APIView):
@@ -169,6 +179,7 @@ class NewLost(APIView):
             os.path.join(settings.MEDIA_ROOT, path)
             return CONFIGS['SITE_DOMAIN'] + picUrl
         lost.save()
+
 
 # 新建拾物信息的界面
 class NewFound(APIView):

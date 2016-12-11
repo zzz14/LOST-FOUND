@@ -4,6 +4,9 @@ import datetime
 import hashlib
 import json
 import logging
+import random
+import string
+import time
 import urllib.request
 import xml.etree.ElementTree as ET
 from LostAndFound.settings import WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET
@@ -87,7 +90,7 @@ class WeChatHandler(object):
         return settings.get_url('u/help')
 
     def url_bind(self):
-        return settings.get_url('u/bind', {'openid': self.user.open_id})
+        return settings.get_url('u/new', {'openid': self.user.open_id})
 
 
 class WeChatEmptyHandler(WeChatHandler):
@@ -110,11 +113,36 @@ class WeChatError(Exception):
         return '[errcode=%d] %s' % (self.errcode, self.errmsg)
 
 
+
+class Sign:
+    def __init__(self, jsapi_ticket, url):
+        self.ret = {
+            'jsapi_ticket': jsapi_ticket,
+            'nonceStr': self.__create_nonce_str(),
+            'timestamp': self.__create_timestamp(),
+            'url': url
+        }
+
+    def __create_nonce_str(self):
+        return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(15))
+
+    def __create_timestamp(self):
+        return int(time.time())
+
+    def sign(self):
+        string = '&'.join(['%s=%s' % (key.lower(), self.ret[key]) for key in sorted(self.ret)])
+        print(string)
+        self.ret['signature'] = hashlib.sha1(string.encode('utf-8')).hexdigest()
+        return self.ret
+
+
 class WeChatLib(object):
 
     logger = logging.getLogger('wechatlib')
     access_token = ''
     access_token_expire = datetime.datetime.fromtimestamp(0)
+    jsapi_ticket = ''
+    jsapi_ticket_expire = datetime.datetime.fromtimestamp(0)
     token = WECHAT_TOKEN
     appid = WECHAT_APPID
     secret = WECHAT_SECRET
@@ -166,6 +194,36 @@ class WeChatLib(object):
             cls.access_token_expire = datetime.datetime.now() + datetime.timedelta(seconds=rjson['expires_in'] - 300)
             cls.logger.info('Got access token %s', cls.access_token)
         return cls.access_token
+
+    @classmethod
+    def get_wechat_jsapi_ticket(cls):
+        if datetime.datetime.now() >= cls.jsapi_ticket_expire:
+            at = cls.get_wechat_access_token()
+            print("access token=%s" %(at))
+            res = cls._http_get(
+                'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi' % (at)
+            )
+            rjson = json.loads(res)
+            if rjson.get('errcode'):
+                raise WeChatError(rjson['errcode'], rjson['errmsg'])
+            cls.jsapi_ticket = rjson['ticket']
+            cls.jsapi_ticket_expire = datetime.datetime.now() + datetime.timedelta(seconds=rjson['expires_in'] - 300)
+            cls.logger.info('Got jsapi ticket %s', cls.jsapi_ticket)
+        return cls.jsapi_ticket
+
+
+    @classmethod
+    def get_wechat_wx_config(cls, url):
+        sign = Sign(cls.get_wechat_jsapi_ticket(), url)
+        config = sign.sign()
+        wx_config = {
+            'appId': settings.WECHAT_APPID,
+            'timestamp': config['timestamp'],
+            'nonceStr': config['nonceStr'],
+            'signature': config['signature']
+        }
+        return wx_config
+
 
     def get_wechat_menu(self):
         res = self._http_get(
@@ -236,3 +294,4 @@ class WeChatView(BaseView):
             for child in root_elem:
                 msg[child.tag] = child.text
         return msg
+

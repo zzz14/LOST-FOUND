@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="/css/weui.css"/>
+    <title>新建失物</title>
+</head>
+<body>
+<div id="wrap">
+    <div id="mainbody" style="background-color:#f8f8f8;"></div>
+    <div id="map"></div>
+
+</div>
+
+<script type="text/template" id="tpl-mainbody">
+
+    <form id="form-new-lost">
+        <div class="weui-cells__title">物品名称</div>
+        <div class="weui-cells">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <input class="weui-input form-new-lost-input" type="text" name="itemName" id="itemName" placeholder="请输入名称" {% if locals.itemName %} value="{{ locals.itemName }}" {% endif %}/>
+                </div>
+            </div>
+        </div>
+
+        <div class="weui-cells__title">物品描述</div>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <textarea class="weui-textarea form-new-lost-input" name="itemDescription" id="itemDescription" placeholder="请输入描述" rows="3">{% if locals.itemDescription %} {{ locals.itemDescription }} {% endif %}</textarea>
+                    <div class="weui-textarea-counter"><span>0</span>/200</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="weui-cells__title">联系人</div>
+        <div class="weui-cells">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <input class="weui-input form-new-lost-input" type="text" name="contacts" id="contacts" placeholder="请输入联系人" {% if locals.contacts %} value="{{ locals.contacts }}" {% endif %}/>
+                </div>
+            </div>
+        </div>
+
+        <div class="weui-cells__title">联系方式</div>
+        <div class="weui-cells">
+
+            <div class="weui-cell weui-cell_select weui-cell_select-before">
+                <div class="weui-cell__hd">
+                    <select class="weui-select form-new-lost-input" name="contactType">
+                        <option value="1">微信号</option>
+                        <option value="2">手机号</option>
+                        <option value="3">email</option>
+                    </select>
+                </div>
+                <div class="weui-cell__bd">
+                    <input class="weui-input form-new-lost-input" name="contactNumber" id="contactNumber" placeholder="联系方式" {% if locals.contactNumber %} value="{{ locals.contactNumber }}" {% endif %}/>
+                </div>
+            </div>
+        </div>
+
+        <div class="weui-cells__title">其他</div>
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__hd"><label for="" class="weui-label">丢失日期</label></div>
+                <div class="weui-cell__bd">
+                    <input class="weui-input form-new-lost-input" type="date" name="lostTime" {% if locals.lostTime %} value="{{ locals.lostTime }}" {% endif %}/>
+                </div>
+            </div>
+            <a class="weui-cell weui-cell_access" href="javascript:;">
+                <div class="weui-cell__hd"><label class="weui-label">丢失地点</label></div>
+                <div class="weui-cell__bd">
+                    <p class="form-new-lost-input" id="lostPlace" name="lostPlace" onclick="m_setPlace()">{% if locals.lostPlace %} {{ locals.lostPlace }} {% else %} 不限 {% endif %}</p>
+                </div>
+                <div class="weui-cell__ft">
+                </div>
+            </a>
+            <div class="weui-cell">
+                <div class="weui-cell__hd"><label class="weui-label">酬金</label></div>
+                <div class="weui-cell__bd">
+                    <input class="weui-input form-new-lost-input" type="number" name="reward" id="reward" pattern="[0-9]*" placeholder="0" {% if locals.reward %} value="{{ locals.reward }}" {% endif %}/>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图片上传 -->
+        <div class="weui-cells__title">失物图片</div>
+        <div class="weui-cells">
+            {% if locals.image.localId %}
+            <ul class="weui_uploader_files js_previews" id="uploaderFiles">
+                <li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url({{ locals.image.localId }})"></li>
+            </ul>
+            {% else %}
+            <div class="weui-uploader__input-box">
+                <input id="uploadPic" class="weui-uploader__input" onclick="m_chooseImage()" multiple />
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="weui-btn-area">
+            <a class="weui-btn weui-btn_primary" href="javascript:" id="m_submit">确定</a>
+        </div>
+    </form>
+
+    <div class="weui-gallery" id="galleryImg-div">
+        <span class="weui-gallery__img" id="galleryImg" onclick="m_backFromPreview()"></span>
+        <div class="weui-gallery__opr">
+            <a href="javascript:" class="weui-gallery__del">
+                <i class="weui-icon-delete weui-icon_gallery-delete" onclick="m_deleteImage()"></i>
+            </a>
+        </div>
+    </div>
+
+
+</div>
+
+</script>
+
+<!-- 地图定位 -->
+<script type="text/template" id="tpl-map">
+    <div class="page_bd" style="position:fixed; top:0px; bottom: 0px; left: 0px; right: 0px; ">
+        <div class="weui-search-bar" id="r-result">
+            <form class="weui-search-bar__form">
+                <div class="weui-search-bar__box">
+                    <input class="weui-search-bar__input" type="text" id="suggestId" />
+                </div>
+            </form>
+            <button class="weui-btn weui-btn_mini weui-btn_default" type="submit" id="map-ok" style="margin-left: 0.5em">ok</button>
+        </div>
+        <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:80%;height:auto; display:none;"></div>
+        <div id="l-map" style="width: 100%; height: 100%; flex: 1"></div>
+    </div>
+</script>
+
+<script src="/3rd/jquery.js"></script>
+<script src="/3rd/swig.js"></script>
+<script src="/js/weixin_lib.js"></script>
+<script src="/js/base.js"></script>
+<script src="/js/validation.js"></script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=5F1YoiVMkVZxB0PkegE8vb60Hl0rPIzc"></script>
+
+<script>
+    var locals = {
+        image: {},
+        place: {},
+    };
+
+    var maps = {
+
+    };
+
+    var render = function () {
+        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+        $('#map').html("");
+        $(".form-new-lost-input").change(function () {
+            var input_name = $(this).attr('name');
+            eval("locals."+input_name+"=$(this).val()");
+            //alert(eval("locals."+input_name));
+        });
+    };
+    var renderMap = function () {
+        $('#mainbody').html("");
+        $('#map').html(swig.render($('#tpl-map').html(), {locals: locals}));
+        maps.map = new BMap.Map("l-map");
+        maps.ac = new BMap.Autocomplete({
+                "input" : "suggestId",
+                "location" : maps.map
+            });
+      //  maps.map.centerAndZoom("清华大学",18);                   // 初始化地图,设置城市和地图级别。
+
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function(r){
+            if(this.getStatus() == BMAP_STATUS_SUCCESS){
+                maps.marker = new BMap.Marker(r.point);
+                maps.marker.enableDragging();
+                maps.marker.addEventListener('dragend',function () {
+                    var pt = maps.marker.getPosition();
+                    var geoc = new BMap.Geocoder();
+                    geoc.getLocation(pt,function (rs) {
+                        var pois = rs.surroundingPois;
+                        $("#suggestId").val(pois[1].title);
+                    });
+                });
+                maps.map.addOverlay(maps.marker);
+                maps.map.centerAndZoom(r.point,18);
+            }
+            else {
+                alert('failed'+this.getStatus());
+            }
+        },{enableHighAccuracy: true});
+
+        maps.ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
+            var str = "";
+            var _value = e.fromitem.value;
+            var value = "";
+            if (e.fromitem.index > -1) {
+                value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+            }
+            str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+
+            value = "";
+            if (e.toitem.index > -1) {
+                _value = e.toitem.value;
+                value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+            }
+            str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+            G("searchResultPanel").innerHTML = str;
+        });
+
+        maps.ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+            var _value = e.item.value;
+            var myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+            G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+            setPlace(myValue);
+        });
+
+        $("#map-ok").click(function () {
+
+            var p = maps.marker.getPosition();
+            locals.place.lng = p.lng;
+            locals.place.lat = p.lat;
+            locals.place.poi = $("#suggestId").val();
+           // alert(locals.image.localId);
+            render();
+            maps = {};
+            $("#lostPlace").html(locals.place.poi);
+        });
+    }
+    $(function () {
+        render();
+        api.get('/api/u/wx/config', {url:location.href}, function (data) {
+            locals.appId = data.appId;
+            locals.timestamp = data.timestamp;
+            locals.nonceStr = data.nonceStr;
+            locals.signature = data.signature;
+            wx.config({
+                debug: false,
+                appId: locals.appId,
+                timestamp: locals.timestamp,
+                nonceStr: locals.nonceStr,
+                signature: locals.signature,
+                jsApiList: [
+                    'chooseImage',
+                    'uploadImage'
+                ]
+            });
+            wx.ready(function () {
+              //  alert('config success');
+            });
+            wx.error(function (res) {
+              //  alert(JSON.stringify(res));
+            });
+        }, dftFail);
+    });
+
+
+    function G(id) {
+        return document.getElementById(id);
+    }
+
+    function setPlace(myValue){
+        //maps.map.clearOverlays();    //清除地图上所有覆盖物
+        var local = new BMap.LocalSearch(map, { //智能搜索
+		    onSearchComplete: function(results){
+                alert('myfun');
+                var pp = results.getPoi(0).point;    //获取第一个智能搜索的结果
+                maps.map.centerAndZoom(pp, 18);
+                maps.marker.setPosition(pp);
+                //maps.map.addOverlay(marker);    //添加标注
+            }
+		});
+      //  alert(myValue);
+		local.search(myValue);
+    }
+
+    var m_chooseImage = function () {
+        wx.chooseImage({
+            count: 1,
+            sizeType: ['compressed'],
+            sourceType: ['album', 'camera'],
+            success: function (res) {
+           //     alert('choose success');
+                locals.image.localId = res.localIds[0];
+                setTimeout(m_uploadImage,100);
+            },
+            fail: function (res) {
+            //    alert(JSON.stringify(res));
+            }
+        });
+    };
+
+    var m_uploadImage = function () {
+        if (locals.image.localId == undefined) {
+            alert('未选择图片');
+            return;
+        } else {
+            wx.uploadImage({
+                localId: locals.image.localId,
+                success: function (res) {
+                    locals.image.serverId = res.serverId;
+                    alert('上传成功');
+                    //tmpl = '<li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url('+locals.image.localId+')"></li>';
+                    //$("#uploaderFiles").append($(tmpl));
+                    //$(".weui-uploader__input-box").hide();
+                    render();
+                },
+                fail: function (res) {
+                //    alert(JSON.stringify(res));
+                }
+            });
+        }
+    };
+
+    var m_previewImage = function () {
+    //    alert($(".weui-uploader__file").attr("style"));
+        $("#galleryImg").attr("style", $(".weui-uploader__file").attr("style"));
+        $("#galleryImg-div").fadeIn(100);
+    }
+
+    var m_backFromPreview = function () {
+        $("#galleryImg-div").fadeOut(100);
+    }
+
+    var m_deleteImage = function () {
+        if (locals.image.localId == undefined) {
+            alert('未选择图片');
+            return;
+        } else {
+            locals.image.localId = undefined;
+            locals.image.serverId = undefined;
+            $("#galleryImg-div").fadeOut(100);
+            //$(".weui-uploader__file").remove();
+            //$(".weui-uploader__input-box").show();
+            render();
+        }
+    }
+    
+    var m_setPlace = function () {
+        renderMap();
+    };
+
+
+
+
+
+</script>
+
+</body>
+</html>

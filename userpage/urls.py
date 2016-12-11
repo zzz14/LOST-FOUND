@@ -20,4 +20,5 @@ urlpatterns = [
     url(r'^mine/found/?$', MineFound.as_view()),
     url(r'^mine/lost/delete/?$', DeleteMineLost.as_view()),
     url(r'^mine/found/delete/?$', DeleteMineFound.as_view()),
+    url(r'^wx/config/?$',WxConfig.as_view())
 ]
