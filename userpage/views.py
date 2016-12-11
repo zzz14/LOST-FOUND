@@ -34,7 +34,8 @@ class FoundList(APIView):
 #失物找领列表的搜索
 class FoundListSearch(APIView):
     def divKey(self):
-        {key: value for key, value in variable}
+        keyWord = jieba.cut(self.input['Content'])
+
 
     def get(self):
         items = []
