@@ -30,7 +30,7 @@ class HelpHandler(WeChatHandler):
     def check(self):
         return self.is_text('帮助', 'help') or self.is_event_click('HELP')
 
-    def HelpHandle(self):
+    def handle(self):
         return self.reply_single_news({
             'Title': self.get_message('help_title'),
             'Description': self.get_message('help_description'),
@@ -42,11 +42,11 @@ class LostHandler(WeChatHandler):
     def check(self):
         return self.is_event_click('SOMETHING_LOST')
 
-    def LostHandle(self):
+    def handle(self):
         return self.reply_single_news({
             'Title': '丢了东西？',
             'Description': '丢了东西请看这儿~',
-            'Url': SITE_DOMAIN + '/u/lost/list',
+            'Url': self.url_lost_list(),
         })
 
 class FoundHandler(WeChatHandler):
@@ -54,11 +54,11 @@ class FoundHandler(WeChatHandler):
     def check(self):
         return self.is_event_click('SOMETHING_FOUND')
 
-    def FoundHandle(self):
+    def handle(self):
         return self.reply_single_news({
             'Title': '捡了东西？',
             'Description': '捡了东西请看这儿~',
-            'Url': SITE_DOMAIN + '/u/found/list',
+            'Url': self.url_found_list(),
         })
 
 class AdminLostHandler(WeChatHandler):
@@ -66,7 +66,7 @@ class AdminLostHandler(WeChatHandler):
     def check(self):
         return self.is_event_click('ADMIN_LOST')
 
-    def AdminLostHandle(self):
+    def handle(self):
         return self.reply_single_news({
             'Title': '失物招领处',
             'Description': '或许这里有你想找的东西~',
@@ -78,7 +78,7 @@ class MyLostHandler(WeChatHandler):
     def check(self):
         return self.is_event_click('MY_LOST')
 
-    def MyLostHandle(self):
+    def handle(self):
         return self.reply_single_news({
             'Title': '我的失物',
             'Description': '看看你丢了多少东西',
@@ -90,7 +90,7 @@ class MyFoundHandler(WeChatHandler):
     def check(self):
         return self.is_event_click('MY_FOUND')
 
-    def MyFoundHandle(self):
+    def handle(self):
         return self.reply_single_news({
             'Title': '我的拾物',
             'Description': '看看你捡了多少东西',

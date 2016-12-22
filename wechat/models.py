@@ -25,7 +25,7 @@ class Lost(models.Model):
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
     reward = models.CharField(max_length=128, default=None)
-    user = models.CharField(max_length=64, unique=True, db_index=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
     picUrl = models.CharField(max_length=256, default=None)
     status = models.IntegerField(default=0)
 
