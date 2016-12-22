@@ -156,7 +156,9 @@ class NewLost(APIView):
                          'description', 'lostTime', 'lostPlace', 'reward')
         lost = Lost(name=self.input['name'],
                     description=self.input['description'],
-                    contact=self.input['contact'],
+                    contacts=self.input['contacts'],
+                    contactNumber = self.input['contactNumber'],
+                    contactType = self.input['contactType'],
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
                     reward=self.input['reward'],

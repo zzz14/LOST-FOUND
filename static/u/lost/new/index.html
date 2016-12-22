@@ -283,7 +283,7 @@
               //  alert('config success');
             });
             wx.error(function (res) {
-              //  alert(JSON.stringify(res));
+                alert(JSON.stringify(res));
             });
         }, dftFail);
     });
@@ -319,7 +319,7 @@
                 setTimeout(m_uploadImage,100);
             },
             fail: function (res) {
-            //    alert(JSON.stringify(res));
+                alert(JSON.stringify(res));
             }
         });
     };
@@ -341,7 +341,7 @@
                     render();
                 },
                 fail: function (res) {
-                //    alert(JSON.stringify(res));
+                    alert(JSON.stringify(res));
                 }
             });
         }
@@ -427,10 +427,10 @@
                 && item['contactType']
                 && item['contacts']
                 && item['contactNumber']) {
-            api.post('/u/lost/new',item,function (data) {
+            api.post('/api/u/lost/new',item,function (data) {
                 $("#successDialog").fadeIn(100);
             }, function (errno, errmsg, e) {
-                $("#failDialogDialog .weui-cell .weui-cell__bd").val("["+errno+"]:"+errmsg);
+                $("#failDialog .weui-dialog .weui-dialog__bd").val("["+errno+"]:"+errmsg);
                 $("#failDialog").fadeIn(100);
             });
         }
