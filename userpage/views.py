@@ -1,8 +1,8 @@
 from urllib.request import Request
-
 from codex.baseerror import *
 import os
-
+import time
+from time import mktime
 from codex.baseview import APIView
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -24,7 +24,7 @@ class FoundList(APIView):
             temp['contactNumber'] = found.contactNumber
             temp['contactType'] = found.contactType
             temp['description'] = found.description
-            temp['foundTime'] = found.foundTime
+            temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
             items.append(temp)
@@ -43,7 +43,7 @@ class LostList(APIView):
             temp['contactNumber'] = lost.contactNumber
             temp['contactType'] = lost.contactType
             temp['description'] = lost.description
-            temp['lostTime'] = lost.lostTime
+            temp['lostTime'] = mktime(lost.lostTime.timetuple())
             temp['lostPlace'] = lost.lostPlace
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
@@ -71,7 +71,7 @@ class MineLost(APIView):
             temp['contactNumber'] = lost.contactNumber
             temp['contactType'] = lost.contactType
             temp['description'] = lost.description
-            temp['lostTime'] = lost.lostTime
+            temp['lostTime'] = mktime(lost.lostTime.timetuple())
             temp['lostPlace'] = lost.lostPlace
             temp['picUrl'] = lost.picUrl
             temp['reward'] = lost.reward
@@ -92,7 +92,7 @@ class MineFound(APIView):
             temp['contactNumber'] = found.contactNumber
             temp['contactType'] = found.contactType
             temp['description'] = found.description
-            temp['foundTime'] = found.foundTime
+            temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
             items.append(temp)
@@ -125,7 +125,7 @@ class FoundDetail(APIView):
         temp['contactType'] = found.contactType
         temp['contactNumber'] = found.contactNumber
         temp['description'] = found.description
-        temp['lostTime'] = found.foundTime
+        temp['lostTime'] = mktime(found.foundTime.timetuple())
         temp['lostPlace'] = found.foundPlace
         temp['picUrl'] = found.picUrl
         return temp
@@ -142,7 +142,7 @@ class LostDetail(APIView):
         temp['contactNumber'] = lost.contactNumber
         temp['contactType'] = lost.contactType
         temp['description'] = lost.description
-        temp['lostTime'] = lost.lostTime
+        temp['lostTime'] = mktime(lost.lostTime.timetuple())
         temp['lostPlace'] = lost.lostPlace
         temp['picUrl'] = lost.picUrl
         temp['reward'] = lost.reward
@@ -153,8 +153,7 @@ class LostDetail(APIView):
 class NewLost(APIView):
     def post(self):
         self.check_input('name', 'contacts', 'contactType', 'contactNumber',\
-                         'description', 'lostTime', 'lostPlace', 'reward','user')
-        user = User.get_by_openid(self.input['user'])
+                         'description', 'lostTime', 'lostPlace', 'reward')
         lost = Lost(name=self.input['name'],
                     description=self.input['description'],
                     contacts=self.input['contacts'],
@@ -163,7 +162,7 @@ class NewLost(APIView):
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
                     reward=self.input['reward'],
-                    user=user,
+                    user=self.user.open_id,
                     status=0)
         if 'lng' in self.input:
             lost.longitude = self.input['lng']
