@@ -2,7 +2,6 @@ from django.utils import timezone
 
 from wechat.wrapper import WeChatView, WeChatLib
 from wechat.handlers import *
-from wechat.models import Lost, Found
 from LostAndFound.settings import WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET, SITE_DOMAIN
 
 
@@ -11,7 +10,7 @@ class CustomWeChatView(WeChatView):
     lib = WeChatLib(WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET)
 
     handlers = [
-        HelpOrSubscribeHandler,
+        HelpHandler, LostHandler, FoundHandler, AdminLostHandler, MyLostHandler, MyFoundHandler
     ]
     error_message_handler = ErrorHandler
     default_handler = DefaultHandler
@@ -19,37 +18,37 @@ class CustomWeChatView(WeChatView):
     menu = {
         'button': [
             {
-                "type": "view",
+                "type": "click",
                 "name": "丢了东西",
-                "url": SITE_DOMAIN + '/u/lost/list',
+                "key": "SOMETHING_LOST",
             },
             {
-                "type": "view",
+                "type": "click",
                 "name": "捡了东西",
-                "url": SITE_DOMAIN + '/u/found/list',
+                "key": "SOMETHING_FOUND",
             },
             {
                 "name": "其他",
                 "sub_button": [
                     {
-                        "type": "view",
+                        "type": "click",
                         "name": "失物招领处",
-                        "url": SITE_DOMAIN + '/u/school_office/list',
+                        "key": "ADMIN_LOST",
                     },
                     {
-                        "type": "view",
+                        "type": "click",
                         "name": "我的失物",
-                        "url": SITE_DOMAIN + '/u/mine/lost',
+                        "key": "MY_LOST",
                     },
                     {
-                        "type": "view",
+                        "type": "click",
                         "name": "我的拾物",
-                        "url": SITE_DOMAIN + '/u/mine/found',
+                        "key": "MY_FOUND",
                     },
                     {
-                        "type": "view",
+                        "type": "click",
                         "name": "帮助",
-                        "url": SITE_DOMAIN + '/u/help',
+                        "key": "HELP",
                     }
                 ]
             }

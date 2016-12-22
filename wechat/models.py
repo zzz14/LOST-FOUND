@@ -16,16 +16,16 @@ class User(models.Model):
 class Lost(models.Model):
     name = models.CharField(max_length=128)
     key = models.CharField(max_length=64, db_index=True)
-    contacts = models.CharField(max_length=128)
-    contactType = models.CharField(max_length=128)
-    contactNumber = models.CharField(max_length=128)
+    contacts = models.CharField(max_length=128, default=None)
+    contactType = models.CharField(max_length=128, default=None)
+    contactNumber = models.CharField(max_length=128, default=None)
     description = models.TextField()
     lostTime = models.DateTimeField(db_index=True)
-    lostPlace = models.CharField(max_length=128)
+    lostPlace = models.CharField(max_length=128, default=None)
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
-    reward = models.CharField(max_length=128)
-    user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
+    reward = models.CharField(max_length=128, default=None)
+    user = models.CharField(max_length=64, unique=True, db_index=True)
     picUrl = models.CharField(max_length=256, default=None)
     status = models.IntegerField(default=0)
 
@@ -33,18 +33,24 @@ class Lost(models.Model):
 class Found(models.Model):
     name = models.CharField(max_length=128)
     key = models.CharField(max_length=64, db_index=True)
-    contacts = models.CharField(max_length=128)
-    contactType = models.CharField(max_length=128)
-    contactNumber = models.CharField(max_length=128)
+    contacts = models.CharField(max_length=128, default=None)
+    contactType = models.CharField(max_length=128, default=None)
+    contactNumber = models.CharField(max_length=128, default=None)
     description = models.TextField()
     foundTime = models.DateTimeField(db_index=True)
-    foundPlace = models.CharField(max_length=128)
+    foundPlace = models.CharField(max_length=128, default=None)
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
     user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
     picUrl = models.CharField(max_length=256, default=None)
     status = models.IntegerField(default=0)
 
+# 失物招领处的失物
+class AdminLost(models.Model):
+    type = models.CharField(max_length=64, db_index=True)
+    picUrl = models.CharField(max_length=256, default=None)
+    publishTime = models.DateTimeField(db_index=True)
+    status = models.IntegerField(default=0)
 
 '''
 class Activity(models.Model):
