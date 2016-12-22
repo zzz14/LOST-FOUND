@@ -335,9 +335,6 @@
                     locals.image.serverId = res.serverId;
                     alert(res.serverId);
                     alert('上传成功');
-                    //tmpl = '<li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url('+locals.image.localId+')"></li>';
-                    //$("#uploaderFiles").append($(tmpl));
-                    //$(".weui-uploader__input-box").hide();
                     render();
                 },
                 fail: function (res) {
@@ -348,7 +345,6 @@
     };
 
     var m_previewImage = function () {
-    //    alert($(".weui-uploader__file").attr("style"));
         $("#galleryImg").attr("style", $(".weui-uploader__file").attr("style"));
         $("#galleryImg-div").fadeIn(100);
     }
@@ -365,8 +361,6 @@
             locals.image.localId = undefined;
             locals.image.serverId = undefined;
             $("#galleryImg-div").fadeOut(100);
-            //$(".weui-uploader__file").remove();
-            //$(".weui-uploader__input-box").show();
             render();
         }
     }

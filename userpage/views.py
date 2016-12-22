@@ -104,14 +104,14 @@ class MineFound(APIView):
 # 需提供信息的id
 class DeleteMineLost(APIView):
     def get(self):
-        Lost.objects.filter(id=self.input['id']).update(status=1);
+        Lost.objects.filter(id=self.input['id']).update(status=1)
 
 
 # 删除我发布的失物信息
 # 需提供信息的id
 class DeleteMineFound(APIView):
     def get(self):
-        Found.objects.filter(id=self.input['id']).update(status=1);
+        Found.objects.filter(id=self.input['id']).update(status=1)
 
 
 # 拾物详情页
@@ -162,41 +162,54 @@ class NewLost(APIView):
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
                     reward=self.input['reward'],
-                    user=self.input['user'],
+                    user=self.user.open_id,
                     status=0)
         if 'lng' in self.input:
             lost.longitude = self.input['lng']
         if 'lat' in self.input:
             lost.latitude = self.input['lat']
         if 'media_id' in self.input:
-            url = "https://api.weixin.qq.com/cgi-bin/media"
             getData = {}
             getData['access_token'] = CONFIGS['WECHAT_TOKEN']
             getData['media_id'] = self.input['media_id']
-            req = Request(url=url, data=getData)
-            f = urllib.request.urlopen(req, timeout=120)
-            picUrl = '/img/lostAndFound/' + str(
-            len(os.listdir(settings.STATIC_ROOT + '/img/lostAndFound/'))) + '_' + data.name
-            path = default_storage.save(settings.STATIC_ROOT + picUrl, ContentFile(data.read()))
-            os.path.join(settings.MEDIA_ROOT, path)
-            return CONFIGS['SITE_DOMAIN'] + picUrl
+            data = urllib.parse.urlencode(getData)
+            url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
+            pic = urllib.request.urlopen(url)
+            f = open(self.input['media_id'] + ".jpg", 'wb')
+            f.write(pic.read())
+            f.close()
+            lost.picUrl = settings.STATIC_ROOT + '/img/lostAndFound/lost/' + str(self.input['media_id'])
         lost.save()
 
 
 # 新建拾物信息的界面
 class NewFound(APIView):
     def post(self):
+        self.check_input('name', 'contacts', 'contactType', 'contactNumber', 'description', 'foundTime', 'foundPlace', 'reward')
         found = Found(name=self.input['name'],
-                      key=self.input['key'],
                       description=self.input['description'],
-                      contact=self.input['contact'],
+                      contacts=self.input['contacts'],
+                      contactNumber=self.input['contactNumber'],
+                      contactType=self.input['contactType'],
                       foundTime=self.input['foundTime'],
                       foundPlace=self.input['foundPlace'],
-                      longitude=self.input['lng'],
-                      latitude=self.input['lat'],
-                      user=self.input['user'],
-                      picUrl=self.input['picUrl'],
+                      user=self.user.open_id,
                       status=0)
+        if 'lng' in self.input:
+            found.longitude = self.input['lng']
+        if 'lat' in self.input:
+            found.latitude = self.input['lat']
+        if 'media_id' in self.input:
+            getData = {}
+            getData['access_token'] = CONFIGS['WECHAT_TOKEN']
+            getData['media_id'] = self.input['media_id']
+            data = urllib.parse.urlencode(getData)
+            url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
+            pic = urllib.request.urlopen(url)
+            f = open(self.input['media_id'] + ".jpg", 'wb')
+            f.write(pic.read())
+            f.close()
+            found.picUrl = settings.STATIC_ROOT + '/img/lostAndFound/found/' + str(self.input['media_id'])
         found.save()
 
 # 图片上传
