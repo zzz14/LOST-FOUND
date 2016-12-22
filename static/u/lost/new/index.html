@@ -114,7 +114,7 @@
     </div>
 
  <!--BEGIN dialog3-->
-    <div class="js_dialog" id="successDialog" style="display: none;">
+    <div class="js_dialog" id="succDialog" style="display: none;">
         <div class="weui-mask"></div>
         <div class="weui-dialog weui-skin_android">
             <div class="weui-dialog__hd"><strong class="weui-dialog__title">创建成功</strong></div>
@@ -123,8 +123,8 @@
                 弹窗内容，告知当前状态、信息和解决方法，描述文字尽量控制在三行内
             </div>
             <div class="weui-dialog__ft">
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">继续修改</a>
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">返回列表</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" onclick="m_modify()">继续修改</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" onclick="m_backToIndex()">返回首页</a>
             </div>
         </div>
     </div>
@@ -139,8 +139,8 @@
                 弹窗内容，告知当前状态、信息和解决方法，描述文字尽量控制在三行内
             </div>
             <div class="weui-dialog__ft">
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">继续修改</a>
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">返回列表</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" onclick="m_modify()">继续修改</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" onclick="m_backToIndex()">返回列表</a>
             </div>
         </div>
     </div>
@@ -263,6 +263,7 @@
     }
     $(function () {
         render();
+        locals.user = urlParam.user;
         api.get('/api/u/wx/config', {url:location.href}, function (data) {
             locals.appId = data.appId;
             locals.timestamp = data.timestamp;
@@ -374,6 +375,15 @@
     var m_setPlace = function () {
         renderMap();
     };
+    
+    var m_modify = function () {
+        $("#failDialog").fadeOut(100);
+        $("#succDialog").fadeOut(100);
+    }
+
+    var m_backToIndex = function () {
+        window.location.href = '/u/lost/list'
+    }
 
     var m_submit = function () {
         var item = {};
@@ -421,6 +431,7 @@
         if(locals.lng) item['lng'] = locals.lng;
         if(locals.lat) item['lat'] = locals.lat;
         if(locals.image.serverId) item['media_id'] = locals.image.serverId;
+        if(locals.user) item['user'] = locals.user;
         item['contactType'] = $("#contactType").val();
         if (item['name']
                 && item['description']
@@ -428,9 +439,9 @@
                 && item['contacts']
                 && item['contactNumber']) {
             api.post('/api/u/lost/new',item,function (data) {
-                $("#successDialog").fadeIn(100);
+                $("#succDialog").fadeIn(100);
             }, function (errno, errmsg, e) {
-                $("#failDialog .weui-dialog .weui-dialog__bd").val("["+errno+"]:"+errmsg);
+                $("#failDialog .weui-dialog .weui-dialog__bd").innerHTML="["+errno+"]:"+errmsg;
                 $("#failDialog").fadeIn(100);
             });
         }

@@ -153,7 +153,8 @@ class LostDetail(APIView):
 class NewLost(APIView):
     def post(self):
         self.check_input('name', 'contacts', 'contactType', 'contactNumber',\
-                         'description', 'lostTime', 'lostPlace', 'reward')
+                         'description', 'lostTime', 'lostPlace', 'reward','user')
+        user = User.get_by_openid(self.input['user'])
         lost = Lost(name=self.input['name'],
                     description=self.input['description'],
                     contacts=self.input['contacts'],
@@ -162,7 +163,7 @@ class NewLost(APIView):
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
                     reward=self.input['reward'],
-                    user=self.input['user'],
+                    user=user,
                     status=0)
         if 'lng' in self.input:
             lost.longitude = self.input['lng']
