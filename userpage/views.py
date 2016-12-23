@@ -19,7 +19,7 @@ from userpage.jieba.jieba.analyse.textrank import TextRank
 from userpage.jieba import jieba
 #import jieba
 #import jieba.analyse
-jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
+#jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
 jieba.set_dictionary('userpage/jieba/extra_dict/dict.txt.small')
 jieba.load_userdict("userpage/jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
 
