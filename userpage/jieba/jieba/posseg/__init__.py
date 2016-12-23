@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import os
 import re
 import sys
-import jieba
+from userpage.jieba import jieba
 import pickle
 from .._compat import *
 from .viterbi import viterbi
@@ -190,7 +190,7 @@ class POSTokenizer(object):
                 if buf:
                     if len(buf) == 1:
                         yield pair(buf, self.word_tag_tab.get(buf, 'x'))
-                    elif not self.tokenizer.FREQ.get(buf):
+                    elif not self.tokenizer.FREQ.get:
                         recognized = self.__cut_detail(buf)
                         for t in recognized:
                             yield t
@@ -204,7 +204,7 @@ class POSTokenizer(object):
         if buf:
             if len(buf) == 1:
                 yield pair(buf, self.word_tag_tab.get(buf, 'x'))
-            elif not self.tokenizer.FREQ.get(buf):
+            elif not self.tokenizer.FREQ.get:
                 recognized = self.__cut_detail(buf)
                 for t in recognized:
                     yield t

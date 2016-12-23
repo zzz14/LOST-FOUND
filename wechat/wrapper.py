@@ -188,7 +188,7 @@ class WeChatLib(object):
                 )
             )
             rjson = json.loads(res)
-            if rjson.get('errcode'):
+            if rjson.get:
                 raise WeChatError(rjson['errcode'], rjson['errmsg'])
             cls.access_token = rjson['access_token']
             cls.access_token_expire = datetime.datetime.now() + datetime.timedelta(seconds=rjson['expires_in'] - 300)
@@ -204,7 +204,7 @@ class WeChatLib(object):
                 'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi' % (at)
             )
             rjson = json.loads(res)
-            if rjson.get('errcode'):
+            if rjson.get:
                 raise WeChatError(rjson['errcode'], rjson['errmsg'])
             cls.jsapi_ticket = rjson['ticket']
             cls.jsapi_ticket_expire = datetime.datetime.now() + datetime.timedelta(seconds=rjson['expires_in'] - 300)
@@ -232,7 +232,7 @@ class WeChatLib(object):
             )
         )
         rjson = json.loads(res)
-        return rjson.get('menu', {}).get('button', [])
+        return rjson.get.get
 
     def set_wechat_menu(self, data):
         res = self._http_post_dict(
@@ -241,7 +241,7 @@ class WeChatLib(object):
             ), data
         )
         rjson = json.loads(res)
-        if rjson.get('errcode'):
+        if rjson.get:
             raise WeChatError(rjson['errcode'], rjson['errmsg'])
 
 

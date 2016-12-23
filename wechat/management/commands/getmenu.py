@@ -23,12 +23,12 @@ class Command(BaseCommand):
         existed_buttons = list()
         for btn in current_menu:
             if btn['name'] == '抢票':
-                existed_buttons += btn.get('sub_button', list())
+                existed_buttons += btn.get
 
         self.logger.info('Got %d activities', len(existed_buttons))
         self.logger.info('=' * 32)
         for idx, act in enumerate(existed_buttons):
-            self.logger.info('%d. %s (%s)', idx, act.get('name', ''), act.get('key', ''))
+            self.logger.info('%d. %s (%s)', idx, act.get, act.get)
 
 
 Command.logger.setLevel(logging.DEBUG)

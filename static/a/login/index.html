@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="Shortcut Icon" href="icon.png">
     <style>
         #content {
             padding-top: 80px;
@@ -10,36 +12,50 @@
     </style>
     <link href="/3rd/bs/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="/3rd/bs/css/signin.css" rel="stylesheet" type="text/css" />
-    <title>登录 - 紫荆之声</title>
+    <title>失物招领处管理员</title>
+    <!--
+    <link rel="stylesheet" href="admin.css" />
+    <script src="jquery-3.1.1.min.js"></script>
+    -->
 </head>
+
 <body>
-    <header class="navbar navbar-default navbar-fixed-top" role="navigation">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" style="cursor:default" id="nav-title"></a>
-            </div>
+  <header class="navbar navbar-default navbar-fixed-top navbar-header" role="navigation">
+      <div class="container">
+          <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" style="cursor:default" id="nav-title"></a>
+          </div>
 
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav" id="nav-li"></ul>
-                <ul class="nav navbar-nav navbar-right" id="nav-li-right"></ul>
-            </div>
-        </div>
-    </header>
+          <div class="navbar-collapse collapse"><!--折叠的导航条 -->
+              <ul class="nav navbar-nav" id="nav-li"></ul><!--navbar:导航条 -->
+              <ul class="nav navbar-nav navbar-right" id="nav-li-right"></ul>
+          </div>
+      </div>
+  </header>
 
-    <div id="content"></div>
+  <div id="content" class="content-style"></div>
 
-    <footer class="bs-footer" role="contentinfo">
-        <hr>
-        <div class="container" id="footer" style="text-align: center"></div>
-    </footer>
+  <footer class="bs-footer" role="contentinfo">
+      <hr>
+      <div class="container" id="footer" style="text-align: center"></div>
+  </footer>
 
 <script type="text/template" id="tpl-nav-title">
-“紫荆之声”票务管理系统
+    <ul class="internetke">
+        <li>
+            <a href="#" class="ke5"><span><span><span><span><span><span><span>
+             L&</br>
+                &F</span></span></span></span></span></span></span></a>
+        </li>
+        <li style="margin-top: 0.48em; font-size: 22px;">
+           &nbsp; 学校失物招领处
+        </li>
+    </ul>
 </script>
 
 <script type="text/template" id="tpl-nav-li">
@@ -49,12 +65,11 @@
 <script type="text/template" id="tpl-nav-li-right">
 
 </script>
-
 <script type="text/template" id="tpl-content">
     <div class="container">
         <form id="form-login" class="form-signin" action="/api/a/login" method="post" role="form">
 
-            <h2 class="form-signin-heading">登录</h2>
+            <h2 class="form-signin-heading">请登录</h2>
 
             <div id="alert"></div>
 
@@ -62,15 +77,14 @@
 
             <input type="password" id="inputPassword" name="password" class="form-control" placeholder="密码" required>
 
-            <input id="loginnow" type="submit" class="btn btn-block btn-primary" value="登录">
+            <input type="submit" id="loginnow" class="btn btn-block btn-primary" value="登录">
         </form>
     </div>
 </script>
 
 <script type="text/template" id="tpl-footer">
-    <a href="http://www.xuetangx.com/" target="_blank">学堂在线</a>
-    <a href="http://www.tsinghua.edu.cn/" target="_blank">清华大学</a>
-    <a href="https://github.com/ThssSE" target="_blank">软件工程</a><br>
+    <a href="http://www.xuetangx.com/" target="_blank">失物招领</a> |
+    <a href="http://www.tsinghua.edu.cn/" target="_blank">寻物启事</a><br>
     &copy; 2016
 </script>
 
@@ -93,18 +107,19 @@
         renderTemplate('footer');
     };
     $(function () {
-        swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+        swig.setDefaultTZOffset(new Date().getTimezoneOffset());//返回时区偏差（time-zone offset）表示协调世界时（UTC）与本地时区之间的差值，单位为分钟
         render();
         $('#loginnow').attr('disabled', true);
         function showError(message, dom){
             $('#alert').addClass('alert alert-danger');
             $('#alert').text(message);
-            dom.focus();
+            dom.focus();//give focus to an element (if it can be focused)
         }
-        api.get('/api/a/login', {}, function (data) {
+        api.get('/api/a/login', {}, function (data) {    //jQuery.get( url [, data ] [, success ] [, dataType ] )
             window.location.href = '/a/activity/list';
         }, function () {
             $('#loginnow').attr('disabled', false);
+            //Form表单参数分别为（参数）：url、onSubmit(none)、success(data)、onBeforeLoad(param)、onLoadSuccess(data)、onLoadError(none)
             api.form($('#form-login'), function (data) {
                 if (urlParam.next) {
                     window.location.href = urlParam.next;

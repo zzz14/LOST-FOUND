@@ -13,13 +13,15 @@ import urllib.request
 from wechat.wrapper import WeChatLib
 
 #分词
-import sys
-sys.path.append('jieba/')
-import jieba
-import jieba.analyse
+#import sys
+#sys.path.append('jieba/')
+from userpage.jieba.jieba.analyse.textrank import TextRank
+from userpage.jieba import jieba
+#import jieba
+#import jieba.analyse
 jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
-jieba.set_dictionary('jieba/extra_dict/dict.txt.small')
-jieba.load_userdict("jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
+jieba.set_dictionary('userpage/jieba/extra_dict/dict.txt.small')
+jieba.load_userdict("userpage/jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
 
 
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
@@ -45,21 +47,22 @@ class FoundList(APIView):
 class FoundListSearch(APIView):
     def divKey(self, contact1):
         count = 0
-        inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        contactKeyWord = list(jieba.analyse.extract_tags(content1, topK=25))
+        inputKeyWord = list(TextRank.textrank(self.input['Content'], topK=25))
+        contactKeyWord = list(TextRank.textrank(contact1, topK=25))
         for item1 in contactKeyWord:
             for item2 in inputKeyWord:
                 if item1 == item2:
-                    count = count + 1
+                    count += 1
                     print(item1)
         return count
 
+    @property
     def get(self):
         items = []
-        keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        result = []
+        keys = list(TextRank.textrank(self.input['Content'], topK=25))
+        result = {}
         for found in Found.objects.get(status=0):
-            searchWord = self.input['Content']
+            #searchWord = self.input['Content']
             temp = {}
             temp['name'] = found.name
             temp['key'] = found.key
@@ -70,7 +73,7 @@ class FoundListSearch(APIView):
             temp['picUrl'] = found.picUrl
             if self.divKey(found.contact) > 0:
                 items.append(temp)
-                result['data'] = keys
+                result['keys'] = keys
                 result['items'] = items
         items.sort(key=lambda x: x["foundTime"])
         return result
@@ -148,14 +151,14 @@ class MineFound(APIView):
 # 需提供信息的id
 class DeleteMineLost(APIView):
     def get(self):
-        Lost.objects.filter(id=self.input['id']).update(status=1);
+        Lost.objects.filter(id=self.input['id']).update(status=1)
 
 
 # 删除我发布的失物信息
 # 需提供信息的id
 class DeleteMineFound(APIView):
     def get(self):
-        Found.objects.filter(id=self.input['id']).update(status=1);
+        Found.objects.filter(id=self.input['id']).update(status=1)
 
 
 # 拾物详情页

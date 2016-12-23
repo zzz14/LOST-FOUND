@@ -5,10 +5,10 @@ from __future__ import absolute_import, unicode_literals
 import sys
 from operator import itemgetter
 from collections import defaultdict
-import jieba.posseg
+from userpage.jieba.jieba import posseg
 from .tfidf import KeywordExtractor
 from .._compat import *
-
+from userpage.jieba import jieba
 
 class UndirectWeightedGraph:
     d = 0.85
