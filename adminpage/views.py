@@ -2,6 +2,7 @@ from codex.baseerror import *
 from codex.baseview import APIView
 from django.contrib import auth
 import os
+import time
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -36,9 +37,10 @@ class userLogout(APIView):
 
 class newAdminLost(APIView):
     def post(self):
-        self.check_input('', 'picUrl')
+        self.check_input('type', 'picUrl')
         adminLost = AdminLost(name=self.input['name'],
-                              key=self.input['key'],)
+                              key=self.input['key'],
+                              publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
         adminLost.save()
         return 0
 
