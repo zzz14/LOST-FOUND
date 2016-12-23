@@ -83,8 +83,8 @@
 </script>
 
 <script type="text/template" id="tpl-footer">
-    <a href="http://www.xuetangx.com/" target="_blank">失物招领</a> |
-    <a href="http://www.tsinghua.edu.cn/" target="_blank">寻物启事</a><br>
+    <a href="/u/lost/list" target="_blank">失物招领</a> |
+    <a href="/u/found/list" target="_blank">寻物启事</a><br>
     &copy; 2016
 </script>
 
@@ -116,7 +116,7 @@
             dom.focus();//give focus to an element (if it can be focused)
         }
         api.get('/api/a/login', {}, function (data) {    //jQuery.get( url [, data ] [, success ] [, dataType ] )
-            window.location.href = '/a/activity/list';
+            window.location.href = '/a/adminpage/list';
         }, function () {
             $('#loginnow').attr('disabled', false);
             //Form表单参数分别为（参数）：url、onSubmit(none)、success(data)、onBeforeLoad(param)、onLoadSuccess(data)、onLoadError(none)
@@ -124,7 +124,7 @@
                 if (urlParam.next) {
                     window.location.href = urlParam.next;
                 } else {
-                    window.location.href = '/a/activity/list';
+                    window.location.href = '/a/adminpage/list';
                 }
             }, function (errno, errmsg, e) {
                 var hint = errmsg;
