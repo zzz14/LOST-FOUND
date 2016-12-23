@@ -3,6 +3,7 @@ from codex.baseview import APIView
 from django.contrib import auth
 import os
 import time
+from time import mktime
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -38,8 +39,8 @@ class userLogout(APIView):
 class newAdminLost(APIView):
     def post(self):
         self.check_input('type', 'picUrl')
-        adminLost = AdminLost(name=self.input['name'],
-                              key=self.input['key'],
+        adminLost = AdminLost(type=self.input['type'],
+                              picUrl=self.input['picUrl'],
                               publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
         adminLost.save()
         return 0
@@ -52,3 +53,21 @@ class uploadImage(APIView):
         path = default_storage.save(settings.STATIC_ROOT + '/img/admin/'+data.name, ContentFile(data.read()))
         os.path.join(settings.MEDIA_ROOT, path)
         return CONFIGS['SITE_DOMAIN'] + '/img/admin/' + data.name
+
+class adminLostList(APIView):
+    def get(self):
+        items = []
+        for lost in AdminLost.objects.filter(publisherId=self.request.user.id,
+                                             status=0):
+            temp = {}
+            temp['id'] = lost.id
+            temp['type'] = lost.type
+            temp['publishTime'] = mktime(lost.publishTime.timetuple())
+            temp['picUrl'] = lost.picUrl
+            items.append(temp)
+        return items
+
+# 需传回要删除的失物id
+class deleteActivity(APIView):
+    def post(self):
+        AdminLost.objects.filter(id=self.input['id']).update(status = 1);
