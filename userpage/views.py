@@ -201,6 +201,7 @@ class NewLost(APIView):
     def post(self):
         self.check_input('name', 'contacts', 'contactType', 'contactNumber',\
                          'description', 'lostTime', 'lostPlace', 'reward')
+        user = User.get_by_openid(self.input['user'])
         lost = Lost(name=self.input['name'],
                     description=self.input['description'],
                     contacts=self.input['contacts'],
@@ -209,7 +210,7 @@ class NewLost(APIView):
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
                     reward=self.input['reward'],
-                    user=self.user.open_id,
+                    user=user,
                     status=0)
         if 'lng' in self.input:
             lost.longitude = self.input['lng']
@@ -222,10 +223,11 @@ class NewLost(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            f = open(self.input['media_id'] + ".jpg", 'wb')
+            lost.picUrl = '/img/lost' + self.input['media_id'] + ".jpg"
+            pic_path = settings.STATIC_ROOT + lost.picUrl
+            f = open(pic_path, 'wb')
             f.write(pic.read())
             f.close()
-            lost.picUrl = settings.STATIC_ROOT + '/img/lostAndFound/lost/' + str(self.input['media_id'])
         lost.save()
 
 
@@ -271,5 +273,4 @@ class uploadImage(APIView):
 class WxConfig(APIView):
     def get(self):
         config = WeChatLib.get_wechat_wx_config(self.input['url'])
-        return config
         return config

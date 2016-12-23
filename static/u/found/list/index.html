@@ -30,7 +30,7 @@
             <p class="weui-media-box__desc">{{ item.description }}</p>
             <ul class="weui-media-box__info">
                 <li class="weui-media-box__info__meta"><img src="/img/location.png">{{ item.lostPlace }} </li>
-                <li class="weui-media-box__info__meta">{{ item.lostTime }}</li>
+                <li class="weui-media-box__info__meta">{{ item.lostTime.getFullYear() }}-{{ item.lostTime.getMonth()+1 }}-{{ item.lostTime.getDate() }}</li>
             </ul>
         </div>
     </a>
@@ -56,7 +56,11 @@
         render();
         locals.user = urlParam.user;
         api.get('/api/u/found/list', {}, function (data) {
+            swig.setDefaultTZOffset(new Date().getTimezoneOffset());
             locals.items = data;
+            for (i=0;i<data.length;i++) {
+                updateDate(locals.items[i],'lostTime');
+            }
             render();
         }, dftFail);
     });
