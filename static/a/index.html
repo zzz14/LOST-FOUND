@@ -9,7 +9,7 @@
         }
     </style>
     <link href="/3rd/bs/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-
+    <link href="/3rd/bs/css/signin.css" rel="stylesheet" type="text/css" />
     <title></title>
 </head>
 <body>
@@ -31,7 +31,7 @@
         </div>
     </header>
 
-    <div id="content"></div>
+    <div id="content" class="content-style"></div>
 
     <footer class="bs-footer" role="contentinfo">
         <hr>
@@ -39,7 +39,16 @@
     </footer>
 
 <script type="text/template" id="tpl-nav-title">
-“紫荆之声”票务管理系统
+    <ul class="internetke">
+        <li>
+            <a href="#" class="ke5"><span><span><span><span><span><span><span>
+             L&</br>
+                &F</span></span></span></span></span></span></span></a>
+        </li>
+        <li style="margin-top: 0.48em; font-size: 22px;">
+           &nbsp; 学校失物招领处
+        </li>
+    </ul>
 </script>
 
 <script type="text/template" id="tpl-nav-li">
@@ -55,11 +64,11 @@
 </script>
 
 <script type="text/template" id="tpl-footer">
-    <a href="http://www.xuetangx.com/" target="_blank">学堂在线</a>
-    <a href="http://www.tsinghua.edu.cn/" target="_blank">清华大学</a>
-    <a href="https://github.com/ThssSE" target="_blank">软件工程</a><br>
+    <a href="/u/lost/list" target="_blank">失物招领</a> |
+    <a href="/u/found/list" target="_blank">寻物启事</a><br>
     &copy; 2016
 </script>
+
 
 <script src="/3rd/jquery.js"></script>
 <script src="/3rd/bs/js/bootstrap.min.js"></script>
@@ -83,7 +92,7 @@
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
         render();
         loginRequired(function () {
-            window.location.href = '/a/activity/list';
+            window.location.href = '/a/adminpage/list';
         });
     });
 </script>

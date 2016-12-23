@@ -12,6 +12,18 @@ from LostAndFound.settings import CONFIGS
 import urllib.request
 from wechat.wrapper import WeChatLib
 
+#分词
+#import sys
+#sys.path.append('jieba/')
+from userpage.jieba.jieba.analyse.textrank import TextRank
+from userpage.jieba import jieba
+#import jieba
+#import jieba.analyse
+jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
+jieba.set_dictionary('userpage/jieba/extra_dict/dict.txt.small')
+jieba.load_userdict("userpage/jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
+
+
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
 # 按界面设计，这里似乎应该删去key，contact，reward这些值
 class FoundList(APIView):
@@ -30,6 +42,41 @@ class FoundList(APIView):
             items.append(temp)
         items.sort(key=lambda x: x["foundTime"])
         return items
+
+#失物找领列表的搜索
+class FoundListSearch(APIView):
+    def divKey(self, contact1):
+        count = 0
+        inputKeyWord = list(TextRank.textrank(self.input['Content'], topK=25))
+        contactKeyWord = list(TextRank.textrank(contact1, topK=25))
+        for item1 in contactKeyWord:
+            for item2 in inputKeyWord:
+                if item1 == item2:
+                    count += 1
+                    print(item1)
+        return count
+
+    @property
+    def get(self):
+        items = []
+        keys = list(TextRank.textrank(self.input['Content'], topK=25))
+        result = {}
+        for found in Found.objects.get(status=0):
+            #searchWord = self.input['Content']
+            temp = {}
+            temp['name'] = found.name
+            temp['key'] = found.key
+            temp['contact'] = found.contact
+            temp['description'] = found.description
+            temp['foundTime'] = found.foundTime
+            temp['foundPlace'] = found.foundPlace
+            temp['picUrl'] = found.picUrl
+            if self.divKey(found.contact) > 0:
+                items.append(temp)
+                result['keys'] = keys
+                result['items'] = items
+        items.sort(key=lambda x: x["foundTime"])
+        return result
 
 
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
@@ -224,4 +271,5 @@ class uploadImage(APIView):
 class WxConfig(APIView):
     def get(self):
         config = WeChatLib.get_wechat_wx_config(self.input['url'])
+        return config
         return config
