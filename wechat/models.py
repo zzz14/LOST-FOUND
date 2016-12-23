@@ -48,9 +48,12 @@ class Found(models.Model):
 # 失物招领处的失物
 class AdminLost(models.Model):
     type = models.CharField(max_length=64, db_index=True)
+    publisherId = models.IntegerField(default=0)
     picUrl = models.CharField(max_length=256, default=None)
     publishTime = models.DateTimeField(db_index=True)
     status = models.IntegerField(default=0)
+
+
 
 '''
 class Activity(models.Model):
