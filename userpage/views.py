@@ -1,11 +1,6 @@
-from urllib.request import Request
-from codex.baseerror import *
 import os
-import time
 from time import mktime
 from codex.baseview import APIView
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from django.conf import settings
 from wechat.models import Lost, Found, AdminLost, publisherIdToPlaces, User
 from LostAndFound.settings import CONFIGS, STATIC_ROOT, get_url
@@ -239,7 +234,7 @@ class NewLost(APIView):
             lost.latitude = self.input['lat']
         if 'media_id' in self.input:
             getData = {}
-            getData['access_token'] = CONFIGS['WECHAT_TOKEN']
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
             getData['media_id'] = self.input['media_id']
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
@@ -273,7 +268,7 @@ class NewFound(APIView):
             found.latitude = self.input['lat']
         if 'media_id' in self.input:
             getData = {}
-            getData['access_token'] = CONFIGS['WECHAT_TOKEN']
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
             getData['media_id'] = self.input['media_id']
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
