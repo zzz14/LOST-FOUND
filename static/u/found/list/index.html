@@ -1,53 +1,44 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="/css/base.css" rel="stylesheet" type="text/css" />
-    <link href="/css/details.css" rel="stylesheet" type="text/css" />
-    <title>活动详情 - 紫荆之声</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="/css/weui.css"/>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=5F1YoiVMkVZxB0PkegE8vb60Hl0rPIzc"></script>
+    <title>失物列表</title>
 </head>
 <body>
 <div id="wrap">
-    <header></header>
-
-    <div class="theme" id="theme"></div>
-
-    <hr/>
     <div id="mainbody"></div>
-
 </div>
-<footer id="footer">
-    <hr />
-    <a href="http://www.xuetangx.com/" target="_blank">学堂在线</a>
-    <a href="http://www.tsinghua.edu.cn/" target="_blank">清华大学</a>
-    <a href="https://github.com/ThssSE" target="_blank">软件工程</a><br>
-    &copy; 2016
-</footer>
-
-<script type="text/template" id="tpl-header">
-    <img class="header-img" src="/img/logo.jpg" />
-</script>
-
-<script type="text/template" id="tpl-theme">
-    {% if activity %}
-        {{ activity.name }}
-    {% else %}
-        正在加载……
-    {% endif %}
-</script>
 
 <script type="text/template" id="tpl-mainbody">
-    {% if items %}
 
-    {% endif %}
-{% for item in items %}
-    <div class="item-block" id="item-{{ item.id }}">
-    <span>{{ item.name }}</span>
-    <span>{{ item.lostPlace }}</span>
-    </div>
-{% endfor %}
+<a onclick="m_createLost()">新建拾物</a>
+<!-- TODO -->
 
+{% if locals.items %}
+<div class="weui-panel__bd">
+    <!-- item -->
+    {% for item in items %}
+    <a href="" class="weui-media-box weui-media-box_appmsg">
+        <div class="weui-media-box__hd">
+            <img class="weui-media-box__thumb" src="{{ item.picUrl }}" alt>
+        </div>
+        <div class="weui-media-box__bd">
+            <h4 class="weui-media-box__title">{{ item.name }}</h4>
+            <p class="weui-media-box__desc">{{ item.description }}</p>
+            <ul class="weui-media-box__info">
+                <li class="weui-media-box__info__meta"><img src="/img/location.png">{{ item.lostPlace }} </li>
+                <li class="weui-media-box__info__meta">{{ item.lostTime }}</li>
+            </ul>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+没有拾物
+{% endif %}
 </script>
 
 <script src="/3rd/jquery.js"></script>
@@ -58,23 +49,27 @@
 <script>
     var locals = {};
     var render = function () {
-        $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
-        $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
     };
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
         render();
-        api.get('/api/u/lost/list', {}, function (data) {
+        locals.user = urlParam.user;
+        api.get('/api/u/found/list', {}, function (data) {
             locals.items = data;
+            render();
         }, dftFail);
     });
     $(".item").click(function () {
         var strs = this.attr("id").split('-');
         if(strs.length == 2){
-            window.location.href = "/u/found/detail?id="+strs[1];
+            window.location.href = "/u/lost/detail?id="+strs[1];
         }
     })
+
+    var m_createLost = function () {
+        window.location.href = "/u/lost/new?user="+locals.user;
+    }
 
 </script>
 </body>
