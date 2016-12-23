@@ -109,15 +109,14 @@ class WeChatHandler(object):
     def url_help(self):
         return settings.get_url('u/help')
 
-    def url_bind(self):
-        return settings.get_url('u/bind', {'openid': self.user.open_id})
+    def url_lost_list(self):
+        return settings.get_url('u/lost/list', {'user': self.user.open_id})
 
-    def url_ticket(self):
-        return settings.get_url('u/ticket')
+    def url_lost_new(self):
+        return settings.get_url('u/lost/new', {'user': self.user.open_id})
 
-    def url_activity(self):
-        return  settings.get_url('u/activity')
-
+    def url_found_list(self):
+        return settings.get_url('u/found/list', {'user': self.user.open_id})
 
 class WeChatEmptyHandler(WeChatHandler):
 

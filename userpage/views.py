@@ -223,7 +223,7 @@ class NewLost(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            lost.picUrl = '/img/lost' + self.input['media_id'] + ".jpg"
+            lost.picUrl = '/img/lost/' + self.input['media_id'] + ".jpg"
             pic_path = settings.STATIC_ROOT + lost.picUrl
             f = open(pic_path, 'wb')
             f.write(pic.read())
