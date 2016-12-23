@@ -7,7 +7,7 @@ from codex.baseview import APIView
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
-from wechat.models import Lost, Found, AdminLost, publisherIdToPlaces
+from wechat.models import Lost, Found, AdminLost, publisherIdToPlaces, User
 from LostAndFound.settings import CONFIGS
 import urllib.request
 from wechat.wrapper import WeChatLib
