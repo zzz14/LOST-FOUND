@@ -9,38 +9,18 @@ import string
 import time
 import urllib.request
 import xml.etree.ElementTree as ET
+from LostAndFound.settings import WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET
 
 from django.http import Http404, HttpResponse
 from django.template.loader import get_template
 
 from LostAndFound import settings
 from codex.baseview import BaseView
-from wechat.models import User
+from wechat.models import Lost, Found, User
 
 
 __author__ = "Epsirom"
 
-
-class Sign:
-    def __init__(self, jsapi_ticket, url):
-        self.ret = {
-            'jsapi_ticket': jsapi_ticket,
-            'nonceStr': self.__create_nonce_str(),
-            'timestamp': self.__create_timestamp(),
-            'url': url
-        }
-
-    def __create_nonce_str(self):
-        return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(15))
-
-    def __create_timestamp(self):
-         return int(time.time())
-
-    def sign(self):
-        string = '&'.join(['%s=%s' % (key.lower(), self.ret[key]) for key in sorted(self.ret)])
-        print(string)
-        self.ret['signature'] = hashlib.sha1(string.encode('utf-8')).hexdigest()
-        return self.ret
 
 class WeChatHandler(object):
 
@@ -118,6 +98,7 @@ class WeChatHandler(object):
     def url_found_list(self):
         return settings.get_url('u/found/list', {'user': self.user.open_id})
 
+
 class WeChatEmptyHandler(WeChatHandler):
 
     def check(self):
@@ -138,17 +119,45 @@ class WeChatError(Exception):
         return '[errcode=%d] %s' % (self.errcode, self.errmsg)
 
 
+
+class Sign:
+    def __init__(self, jsapi_ticket, url):
+        self.ret = {
+            'jsapi_ticket': jsapi_ticket,
+            'nonceStr': self.__create_nonce_str(),
+            'timestamp': self.__create_timestamp(),
+            'url': url
+        }
+
+    def __create_nonce_str(self):
+        return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(15))
+
+    def __create_timestamp(self):
+        return int(time.time())
+
+    def sign(self):
+        string = '&'.join(['%s=%s' % (key.lower(), self.ret[key]) for key in sorted(self.ret)])
+        print(string)
+        self.ret['signature'] = hashlib.sha1(string.encode('utf-8')).hexdigest()
+        return self.ret
+
+
 class WeChatLib(object):
 
     logger = logging.getLogger('wechatlib')
+    access_token = ''
+    access_token_expire = datetime.datetime.fromtimestamp(0)
+    jsapi_ticket = ''
+    jsapi_ticket_expire = datetime.datetime.fromtimestamp(0)
+    token = WECHAT_TOKEN
+    appid = WECHAT_APPID
+    secret = WECHAT_SECRET
 
     def __init__(self, token, appid, secret):
         super(WeChatLib, self).__init__()
         self.token = token
         self.appid = appid
         self.secret = secret
-        self.access_token = ''
-        self.access_token_expire = datetime.datetime.fromtimestamp(0)
 
     def check_signature(self, signature, timestamp, nonce):
         tmp_list = sorted([self.token, timestamp, nonce])
@@ -175,8 +184,10 @@ class WeChatLib(object):
     def _http_post_dict(cls, url, data):
         return cls._http_post(url, json.dumps(data, ensure_ascii=False))
 
+    @classmethod
     def get_wechat_access_token(cls):
         if datetime.datetime.now() >= cls.access_token_expire:
+            print("appid=%s secret=%s" %(cls.appid, cls.secret))
             res = cls._http_get(
                 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s' % (
                     cls.appid, cls.secret
