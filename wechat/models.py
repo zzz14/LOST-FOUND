@@ -53,6 +53,11 @@ class AdminLost(models.Model):
     publishTime = models.DateTimeField(db_index=True)
     status = models.IntegerField(default=0)
 
+publisherIdToPlaces = {
+    1 : "文科图书馆",
+    2 : "听涛园",
+    3 : "清芬园"
+}
 
 
 '''
