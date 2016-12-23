@@ -7,11 +7,10 @@ from codex.baseview import APIView
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
-from wechat.models import Lost, Found, User
+from wechat.models import Lost, Found, AdminLost, publisherIdToPlaces, User
 from LostAndFound.settings import CONFIGS
 import urllib.request
 from wechat.wrapper import WeChatLib
-
 #分词
 #import sys
 #sys.path.append('jieba/')
@@ -61,8 +60,7 @@ class FoundListSearch(APIView):
         items = []
         keys = list(TextRank.textrank(self.input['Content'], topK=25))
         result = {}
-        for found in Found.objects.get(status=0):
-            #searchWord = self.input['Content']
+        for found in Found.objects.filter(status=0):
             temp = {}
             temp['name'] = found.name
             temp['key'] = found.key
@@ -102,8 +100,17 @@ class LostList(APIView):
 # 学校失物招领处失物列表
 # 内容还没写
 class SchoolOfficeLostList(APIView):
-    def post(self):
-        return
+    def get(self):
+        items = []
+        for lost in AdminLost.objects.filter(status=0):
+            temp = {}
+            temp['id'] = lost.id
+            temp['place'] = publisherIdToPlaces[lost.id]
+            temp['type'] = lost.type
+            temp['publishTime'] = mktime(lost.publishTime.timetuple())
+            temp['picUrl'] = lost.picUrl
+            items.append(temp)
+        return items
 
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
@@ -177,7 +184,6 @@ class FoundDetail(APIView):
         temp['picUrl'] = found.picUrl
         return temp
 
-
 # 失物详情页
 # 需提供失物的id
 class LostDetail(APIView):
@@ -196,11 +202,27 @@ class LostDetail(APIView):
         return temp
 
 
+# 失物招领处失物详情页
+# 需提供失物的id
+class AdminLostDetail(APIView):
+    def get(self):
+        items = []
+        for lost in AdminLost.objects.GET(id = self.input['id']):
+            temp = {}
+            temp['id'] = lost.id
+            temp['place'] = publisherIdToPlaces[lost.id]
+            temp['type'] = lost.type
+            temp['publishTime'] = mktime(lost.publishTime.timetuple())
+            temp['picUrl'] = lost.picUrl
+            items.append(temp)
+        return items
+
 # 新建失物信息的界面
 class NewLost(APIView):
     def post(self):
         self.check_input('name', 'contacts', 'contactType', 'contactNumber',\
                          'description', 'lostTime', 'lostPlace', 'reward')
+        user = User.get_by_openid(self.input['user'])
         lost = Lost(name=self.input['name'],
                     description=self.input['description'],
                     contacts=self.input['contacts'],
@@ -209,7 +231,7 @@ class NewLost(APIView):
                     lostTime=self.input['lostTime'],
                     lostPlace=self.input['lostPlace'],
                     reward=self.input['reward'],
-                    user=self.user.open_id,
+                    user=user,
                     status=0)
         if 'lng' in self.input:
             lost.longitude = self.input['lng']
@@ -222,12 +244,12 @@ class NewLost(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            f = open(self.input['media_id'] + ".jpg", 'wb')
+            lost.picUrl = '/img/lost/' + self.input['media_id'] + ".jpg"
+            pic_path = settings.STATIC_ROOT + lost.picUrl
+            f = open(pic_path, 'wb')
             f.write(pic.read())
             f.close()
-            lost.picUrl = settings.STATIC_ROOT + '/img/lostAndFound/lost/' + str(self.input['media_id'])
         lost.save()
-
 
 # 新建拾物信息的界面
 class NewFound(APIView):
@@ -259,17 +281,7 @@ class NewFound(APIView):
             found.picUrl = settings.STATIC_ROOT + '/img/lostAndFound/found/' + str(self.input['media_id'])
         found.save()
 
-# 图片上传
-class uploadImage(APIView):
-    def post(self):
-        data = self.input['image_id']
-        picUrl = '/img/lostAndFound/' + str(len(os.listdir(settings.STATIC_ROOT+'/img/lostAndFound/'))) + '_' + data.name
-        path = default_storage.save(settings.STATIC_ROOT + picUrl, ContentFile(data.read()))
-        os.path.join(settings.MEDIA_ROOT, path)
-        return CONFIGS['SITE_DOMAIN'] + picUrl
-
 class WxConfig(APIView):
     def get(self):
         config = WeChatLib.get_wechat_wx_config(self.input['url'])
-        return config
         return config
