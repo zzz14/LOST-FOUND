@@ -4,6 +4,9 @@ import datetime
 import hashlib
 import json
 import logging
+import random
+import string
+import time
 import urllib.request
 import xml.etree.ElementTree as ET
 
@@ -17,6 +20,27 @@ from wechat.models import User
 
 __author__ = "Epsirom"
 
+
+class Sign:
+    def __init__(self, jsapi_ticket, url):
+        self.ret = {
+            'jsapi_ticket': jsapi_ticket,
+            'nonceStr': self.__create_nonce_str(),
+            'timestamp': self.__create_timestamp(),
+            'url': url
+        }
+
+    def __create_nonce_str(self):
+        return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(15))
+
+    def __create_timestamp(self):
+         return int(time.time())
+
+    def sign(self):
+        string = '&'.join(['%s=%s' % (key.lower(), self.ret[key]) for key in sorted(self.ret)])
+        print(string)
+        self.ret['signature'] = hashlib.sha1(string.encode('utf-8')).hexdigest()
+        return self.ret
 
 class WeChatHandler(object):
 
@@ -85,15 +109,14 @@ class WeChatHandler(object):
     def url_help(self):
         return settings.get_url('u/help')
 
-    def url_bind(self):
-        return settings.get_url('u/bind', {'openid': self.user.open_id})
+    def url_lost_list(self):
+        return settings.get_url('u/lost/list', {'user': self.user.open_id})
 
-    def url_ticket(self):
-        return settings.get_url('u/ticket')
+    def url_lost_new(self):
+        return settings.get_url('u/lost/new', {'user': self.user.open_id})
 
-    def url_activity(self):
-        return  settings.get_url('u/activity')
-
+    def url_found_list(self):
+        return settings.get_url('u/found/list', {'user': self.user.open_id})
 
 class WeChatEmptyHandler(WeChatHandler):
 
@@ -152,20 +175,50 @@ class WeChatLib(object):
     def _http_post_dict(cls, url, data):
         return cls._http_post(url, json.dumps(data, ensure_ascii=False))
 
-    def get_wechat_access_token(self):
-        if datetime.datetime.now() >= self.access_token_expire:
-            res = self._http_get(
+    def get_wechat_access_token(cls):
+        if datetime.datetime.now() >= cls.access_token_expire:
+            res = cls._http_get(
                 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s' % (
-                    self.appid, self.secret
+                    cls.appid, cls.secret
                 )
             )
             rjson = json.loads(res)
             if rjson.get('errcode'):
                 raise WeChatError(rjson['errcode'], rjson['errmsg'])
-            self.access_token = rjson['access_token']
-            self.access_token_expire = datetime.datetime.now() + datetime.timedelta(seconds=rjson['expires_in'] - 300)
-            self.logger.info('Got access token %s', self.access_token)
-        return self.access_token
+            cls.access_token = rjson['access_token']
+            cls.access_token_expire = datetime.datetime.now() + datetime.timedelta(seconds=rjson['expires_in'] - 300)
+            cls.logger.info('Got access token %s', cls.access_token)
+        return cls.access_token
+
+    @classmethod
+    def get_wechat_jsapi_ticket(cls):
+        if datetime.datetime.now() >= cls.jsapi_ticket_expire:
+            at = cls.get_wechat_access_token()
+            print("access token=%s" %(at))
+            res = cls._http_get(
+                'https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=%s&type=jsapi' % (at)
+            )
+            rjson = json.loads(res)
+            if rjson.get('errcode'):
+                raise WeChatError(rjson['errcode'], rjson['errmsg'])
+            cls.jsapi_ticket = rjson['ticket']
+            cls.jsapi_ticket_expire = datetime.datetime.now() + datetime.timedelta(seconds=rjson['expires_in'] - 300)
+            cls.logger.info('Got jsapi ticket %s', cls.jsapi_ticket)
+        return cls.jsapi_ticket
+
+
+    @classmethod
+    def get_wechat_wx_config(cls, url):
+        sign = Sign(cls.get_wechat_jsapi_ticket(), url)
+        config = sign.sign()
+        wx_config = {
+            'appId': settings.WECHAT_APPID,
+            'timestamp': config['timestamp'],
+            'nonceStr': config['nonceStr'],
+            'signature': config['signature']
+        }
+        return wx_config
+
 
     def get_wechat_menu(self):
         res = self._http_get(
