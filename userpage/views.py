@@ -1,14 +1,9 @@
-from urllib.request import Request
-from codex.baseerror import *
 import os
-import time
 from time import mktime
 from codex.baseview import APIView
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from django.conf import settings
 from wechat.models import Lost, Found, AdminLost, publisherIdToPlaces, User
-from LostAndFound.settings import CONFIGS
+from LostAndFound.settings import CONFIGS, STATIC_ROOT, get_url
 import urllib.request
 from wechat.wrapper import WeChatLib
 #分词
@@ -239,14 +234,17 @@ class NewLost(APIView):
             lost.latitude = self.input['lat']
         if 'media_id' in self.input:
             getData = {}
-            getData['access_token'] = CONFIGS['WECHAT_TOKEN']
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
             getData['media_id'] = self.input['media_id']
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            lost.picUrl = '/img/lost/' + self.input['media_id'] + ".jpg"
-            pic_path = settings.STATIC_ROOT + lost.picUrl
-            f = open(pic_path, 'wb')
+            pic_name = self.input['media_id']+'.jpg'
+            pic_path = os.path.join('img','lost',pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT,pic_path)
+            lost.picUrl = get_url(pic_path)
+            f = open(pic_full_path, 'wb')
+            # TODO
             f.write(pic.read())
             f.close()
         lost.save()
@@ -270,7 +268,7 @@ class NewFound(APIView):
             found.latitude = self.input['lat']
         if 'media_id' in self.input:
             getData = {}
-            getData['access_token'] = CONFIGS['WECHAT_TOKEN']
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
             getData['media_id'] = self.input['media_id']
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
