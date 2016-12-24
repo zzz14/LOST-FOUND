@@ -38,10 +38,15 @@ class userLogout(APIView):
 
 class newAdminLost(APIView):
     def post(self):
-        self.check_input('type', 'picUrl')
+        self.check_input('type', 'picUrl0','picUrl1','picUrl2','picUrl3')
         adminLost = AdminLost(type=self.input['type'],
-                              picUrl=self.input['picUrl'],
-                              publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
+                              picUrl0=self.input['picUrl0'],
+                              picUrl1=self.input['picUrl1'],
+                              picUrl2=self.input['picUrl2'],
+                              picUrl3=self.input['picUrl3'],
+                              publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())),
+                              status=self.input['status'])
+
         adminLost.save()
         return 0
 
@@ -50,20 +55,25 @@ class uploadImage(APIView):
         if not self.request.user.is_authenticated():
             raise ValidateError('Not logined!')
         data = self.request.FILES['image']
-        path = default_storage.save(settings.STATIC_ROOT + '/img/admin/'+data.name, ContentFile(data.read()))
+        path = default_storage.save(settings.STATIC_ROOT + '/img/adminpage/'+data.name, ContentFile(data.read()))
         os.path.join(settings.MEDIA_ROOT, path)
-        return CONFIGS['SITE_DOMAIN'] + '/img/admin/' + data.name
+        return CONFIGS['SITE_DOMAIN'] + '/img/adminpage/' + data.name
 
 class adminLostList(APIView):
     def get(self):
         items = []
-        for lost in AdminLost.objects.filter(publisherId=self.request.user.id,
-                                             status=0):
+        for lost in AdminLost.objects.all():
+            print(lost.id)
+
             temp = {}
             temp['id'] = lost.id
+            temp['status'] = lost.status
             temp['type'] = lost.type
             temp['publishTime'] = mktime(lost.publishTime.timetuple())
-            temp['picUrl'] = lost.picUrl
+            temp['picUrl0'] = lost.picUrl0
+            temp['picUrl1'] = lost.picUrl1
+            temp['picUrl2'] = lost.picUrl2
+            temp['picUrl3'] = lost.picUrl3
             items.append(temp)
         return items
 

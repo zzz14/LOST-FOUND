@@ -8,4 +8,9 @@ __author__ = "Epsirom"
 
 urlpatterns = [
     url(r'^login/?$', userLogin.as_view()),
+    url(r'^image/upload/?$',uploadImage.as_view()),
+    url(r'^adminpage/list/?$', adminLostList.as_view()),
+    url(r'^adminpage/detail/?$', newAdminLost.as_view()),
+    url(r'^adminpage/create/?$', newAdminLost.as_view()),
+
 ]
