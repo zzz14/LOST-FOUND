@@ -14,25 +14,33 @@
 
 <script type="text/template" id="tpl-mainbody">
 
-<div class="weui-search-bar">
+<div class="weui-search-bar" id="searchBar">
     <form class="weui-search-bar__form">
         <div class="weui-search-bar__box">
-            <input class="weui-search-bar__input" type="text" id="suggestId" />
+            <i class="weui-icon-search"></i>
+            <input class="weui-search-bar__input" type="text" id="searchInput" placeholder="搜索" required />
+            <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
         </div>
+        <label class="weui-search-bar__label" id="searchText">
+            <i class="weui-icon-search"></i>
+            <span>搜索</span>
+        </label>
     </form>
     <!--
     <a onclick="m_searchByPlace()"><img src="location.png" style="padding-left: 0.4em; vertical-align:middle; width:1em "></a>
     -->
-    <a onclick="m_createLost()"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
+    <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
+    <a href="javascript:" class="weui-search-bar_focusing" id="createLost"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
 </div>
+
 
 {% if locals.items %}
 <div class="weui-panel__bd">
     <!-- item -->
     {% for item in items %}
 
-    <div class="item" id="item-{{ item.id }}">
-        <a class="weui-media-box weui-media-box_appmsg">
+
+        <div class="weui-media-box weui-media-box_appmsg item" id="item-{{ item.id }}">
             <div class="weui-media-box__hd">
                 <img class="weui-media-box__thumb" src="{{ item.picUrl }}" alt>
             </div>
@@ -41,17 +49,22 @@
                 <p class="weui-media-box__desc">{{ item.description }}</p>
                 <ul class="weui-media-box__info">
                     <li class="weui-media-box__info__meta"><img src="/img/location.png">{{ item.lostPlace }} </li>
-                    <li class="weui-media-box__info__meta">{{ item.lostTime.getFullYear() }}-{{ item.lostTime.getMonth()+1 }}-{{ item.lostTime.getDate() }}</li>
+                    {% if item.showtime %}
+                    <div class="date" style="float:right; width:38%">
+                        <li class="weui-media-box__info__meta">{{ item.showtime }}</li>
+                    </div>
+                    {% endif %}
                 </ul>
             </div>
-        </a>
-    </div>
+        </div>
+
     {% endfor %}
 </div>
 {% else %}
 没有拾物
 {% endif %}
 </script>
+
 
 <script src="/3rd/jquery.js"></script>
 <script src="/3rd/swig.js"></script>
@@ -63,30 +76,56 @@
     var render = function () {
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
         $('.item').click( function () {
-        var strs = $(this).attr("id").split('-');
-        if(strs.length == 2){
-            window.location.href = "/u/found/detail?id="+strs[1];
+            var strs = $(this).attr("id").split('-');
+            if(strs.length == 2){
+                window.location.href = "/u/found/detail?id="+strs[1];
         }
     });
+        $('#searchText').on('click', function(){
+            $('#searchBar').addClass('weui-search-bar_focusing');
+            $('#searchInput').focus();
+            $('#createLost').hide();
+        });
+        $('#searchInput').on('blur', function () {
+                if(!this.value.length) cancelSearch();
+            });
+        $('#searchClear').on('click', function(){
+            $('#searchInput').val('');
+            $('#searchInput').focus();
+        });
+        $('#searchCancel').on('click', function(){
+            cancelSearch();
+            $('#searchInput').blur();
+        });
+        $('#createLost').on('click', function () {
+            window.location.href = "/u/lost/new?user="+locals.user;
+        });
+
+        function cancelSearch(){
+            $('#searchBar').removeClass('weui-search-bar_focusing');
+            $('#searchText').show();
+            $('#createLost').show();
+        }
     };
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
-        render();
         locals.user = urlParam.user;
         api.get('/api/u/found/list', {}, function (data) {
             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
             locals.items = data;
             for (i=0;i<data.length;i++) {
                 updateDate(locals.items[i],'lostTime');
+                if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
+                    locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
                 locals.items[i].id = i;
             }
             render();
+
         }, dftFail);
     });
 
+    var m_searchByPlace= function () {
 
-    var m_createLost = function () {
-        window.location.href = "/u/lost/new?user="+locals.user;
     }
 
 </script>
