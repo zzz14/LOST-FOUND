@@ -49,9 +49,13 @@ class Found(models.Model):
 class AdminLost(models.Model):
     type = models.CharField(max_length=64, db_index=True)
     publisherId = models.IntegerField(default=0)
-    picUrl = models.CharField(max_length=256, default=None)
+    picUrl0 = models.CharField(max_length=256, default=None)
+    picUrl1 = models.CharField(max_length=256, default=None)
+    picUrl2 = models.CharField(max_length=256, default=None)
+    picUrl3 = models.CharField(max_length=256, default=None)
     publishTime = models.DateTimeField(db_index=True)
     status = models.IntegerField(default=0)
+
 
 publisherIdToPlaces = {
     1 : "文科图书馆",
