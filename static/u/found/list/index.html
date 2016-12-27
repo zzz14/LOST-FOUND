@@ -4,21 +4,21 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="/css/weui.css"/>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=5F1YoiVMkVZxB0PkegE8vb60Hl0rPIzc"></script>
     <title>失物列表</title>
 </head>
 <body>
 <div id="wrap">
+    <div id="searchbar"></div>
     <div id="mainbody"></div>
 </div>
 
-<script type="text/template" id="tpl-mainbody">
+<script type="text/template" id="tpl-searchbar">
 
 <div class="weui-search-bar" id="searchBar">
     <form class="weui-search-bar__form">
         <div class="weui-search-bar__box">
             <i class="weui-icon-search"></i>
-            <input class="weui-search-bar__input" type="text" id="searchInput" placeholder="搜索" required />
+            <input class="weui-search-bar__input" type="search" id="searchInput" placeholder="搜索" required />
             <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
         </div>
         <label class="weui-search-bar__label" id="searchText">
@@ -32,7 +32,9 @@
     <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
     <a href="javascript:" class="weui-search-bar_focusing" id="createLost"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
 </div>
+</script>
 
+<script type="text/template" id="tpl-mainbody">
 
 {% if locals.items %}
 <div class="weui-panel__bd">
@@ -48,7 +50,7 @@
                 <h4 class="weui-media-box__title">{{ item.name }}</h4>
                 <p class="weui-media-box__desc">{{ item.description }}</p>
                 <ul class="weui-media-box__info">
-                    <li class="weui-media-box__info__meta"><img src="/img/location.png">{{ item.lostPlace }} </li>
+                    <li class="weui-media-box__info__meta"><img src="/img/location2.png"> {{ item.lostPlace }} </li>
                     {% if item.showtime %}
                     <div class="date" style="float:right; width:38%">
                         <li class="weui-media-box__info__meta">{{ item.showtime }}</li>
@@ -73,26 +75,40 @@
 
 <script>
     var locals = {};
-    var render = function () {
-        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
-        $('.item').click( function () {
-            var strs = $(this).attr("id").split('-');
-            if(strs.length == 2){
-                window.location.href = "/u/found/detail?id="+strs[1];
-        }
-    });
+    var renderSearchbar = function () {
+        $('#searchbar').html(swig.render($('#tpl-searchbar').html(), {}));
         $('#searchText').on('click', function(){
             $('#searchBar').addClass('weui-search-bar_focusing');
             $('#searchInput').focus();
             $('#createLost').hide();
         });
-        $('#searchInput').on('blur', function () {
-                if(!this.value.length) cancelSearch();
-            });
-        $('#searchClear').on('click', function(){
-            $('#searchInput').val('');
-            $('#searchInput').focus();
-        });
+        $('#searchInput')
+                .on('blur', function () {
+                    if(!this.value.length) cancelSearch();
+                })
+                .on('keypress', function(e) {
+                    if (e.which == 13) {
+                        data = {
+                            'Content': $(this).val(),
+                        };
+                        api.get('/api/u/found/list_search',data,function (data) {
+                            swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+                            locals.items = data;
+                            for (i=0;i<data.length;i++) {
+                                updateDate(locals.items[i],'lostTime');
+                                if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
+                                    locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
+                            }
+                            renderMainbody();
+                        }, dftFail);
+                    }
+                });
+        $('#searchClear')
+                .on('click', function(){
+                    $('#searchInput').val('');
+                    $('#searchInput').focus();
+                })
+                ;
         $('#searchCancel').on('click', function(){
             cancelSearch();
             $('#searchInput').blur();
@@ -106,10 +122,21 @@
             $('#searchText').show();
             $('#createLost').show();
         }
+    }
+    var renderMainbody = function () {
+        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+        $('.item').click( function () {
+            var strs = $(this).attr("id").split('-');
+            if(strs.length == 2){
+                window.location.href = "/u/found/detail?id="+strs[1];
+        }
+    });
+
     };
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
         locals.user = urlParam.user;
+        renderSearchbar();
         api.get('/api/u/found/list', {}, function (data) {
             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
             locals.items = data;
@@ -118,8 +145,7 @@
                 if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
                     locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
             }
-            render();
-
+            renderMainbody();
         }, dftFail);
     });
 

@@ -53,6 +53,7 @@ class FoundListSearch(APIView):
 
     @property
     def get(self):
+        self.check_input('Content')
         items = []
         keys = list(TextRank.textrank(self.input['Content'], topK=25))
         result = {}

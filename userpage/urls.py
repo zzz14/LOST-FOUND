@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^lost/new/?$', NewLost.as_view()),
     url(r'^lost/detail/?$', FoundDetail.as_view()),
     url(r'^found/list/?$', LostList.as_view()),
+    url(r'^found/list_search/?$', FoundListSearch.as_view()),
     url(r'^found/new/?$', NewFound.as_view()),
     url(r'^found/detail/?$', LostDetail.as_view()),
     url(r'^school_office/list/?$', SchoolOfficeLostList.as_view()),
