@@ -14,26 +14,38 @@
 
 <script type="text/template" id="tpl-mainbody">
 
-<a onclick="m_createLost()">新建拾物</a>
-<!-- TODO -->
+<div class="weui-search-bar">
+    <form class="weui-search-bar__form">
+        <div class="weui-search-bar__box">
+            <input class="weui-search-bar__input" type="text" id="suggestId" />
+        </div>
+    </form>
+    <!--
+    <a onclick="m_searchByPlace()"><img src="location.png" style="padding-left: 0.4em; vertical-align:middle; width:1em "></a>
+    -->
+    <a onclick="m_createLost()"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
+</div>
 
 {% if locals.items %}
 <div class="weui-panel__bd">
     <!-- item -->
     {% for item in items %}
-    <a href="" class="weui-media-box weui-media-box_appmsg">
-        <div class="weui-media-box__hd">
-            <img class="weui-media-box__thumb" src="{{ item.picUrl }}" alt>
-        </div>
-        <div class="weui-media-box__bd">
-            <h4 class="weui-media-box__title">{{ item.name }}</h4>
-            <p class="weui-media-box__desc">{{ item.description }}</p>
-            <ul class="weui-media-box__info">
-                <li class="weui-media-box__info__meta"><img src="/img/location.png">{{ item.lostPlace }} </li>
-                <li class="weui-media-box__info__meta">{{ item.lostTime.getFullYear() }}-{{ item.lostTime.getMonth()+1 }}-{{ item.lostTime.getDate() }}</li>
-            </ul>
-        </div>
-    </a>
+
+    <div class="item" id="item-{{ item.id }}">
+        <a class="weui-media-box weui-media-box_appmsg">
+            <div class="weui-media-box__hd">
+                <img class="weui-media-box__thumb" src="{{ item.picUrl }}" alt>
+            </div>
+            <div class="weui-media-box__bd">
+                <h4 class="weui-media-box__title">{{ item.name }}</h4>
+                <p class="weui-media-box__desc">{{ item.description }}</p>
+                <ul class="weui-media-box__info">
+                    <li class="weui-media-box__info__meta"><img src="/img/location.png">{{ item.lostPlace }} </li>
+                    <li class="weui-media-box__info__meta">{{ item.lostTime.getFullYear() }}-{{ item.lostTime.getMonth()+1 }}-{{ item.lostTime.getDate() }}</li>
+                </ul>
+            </div>
+        </a>
+    </div>
     {% endfor %}
 </div>
 {% else %}
@@ -50,6 +62,12 @@
     var locals = {};
     var render = function () {
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+        $('.item').click( function () {
+        var strs = $(this).attr("id").split('-');
+        if(strs.length == 2){
+            window.location.href = "/u/found/detail?id="+strs[1];
+        }
+    });
     };
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
@@ -60,16 +78,12 @@
             locals.items = data;
             for (i=0;i<data.length;i++) {
                 updateDate(locals.items[i],'lostTime');
+                locals.items[i].id = i;
             }
             render();
         }, dftFail);
     });
-    $(".item").click(function () {
-        var strs = this.attr("id").split('-');
-        if(strs.length == 2){
-            window.location.href = "/u/lost/detail?id="+strs[1];
-        }
-    })
+
 
     var m_createLost = function () {
         window.location.href = "/u/lost/new?user="+locals.user;
