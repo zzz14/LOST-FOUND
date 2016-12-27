@@ -78,7 +78,6 @@
             locals.items = data;
             for (i=0;i<data.length;i++) {
                 updateDate(locals.items[i],'lostTime');
-                locals.items[i].id = i;
             }
             render();
         }, dftFail);
