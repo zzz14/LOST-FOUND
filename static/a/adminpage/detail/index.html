@@ -55,7 +55,7 @@
     <li><a class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/list">我的发布</a></li>
     <li class="active">
         {% if isCreate %}
-            <a style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/detail?create=1">新建发布</a>
+            <a style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/detail?create=1&adminName={{adminName }}">新建发布</a>
         {% else %}
             <a style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/detail?id={{ activity_id }}"> {{ "正在载入" }} </a>
         {% endif %}
@@ -63,7 +63,7 @@
 </script>
 
 <script type="text/template" id="tpl-nav-li-right">
-    <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px; color: #9B9B9B" >我是某某管理员</a></li>
+    <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px; color: #9B9B9B" >{{ adminName }}</a></li>
     <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px;" onclick="logout()" >注销</a></li>
 </script>
 
@@ -112,20 +112,15 @@
             <div class="form-group">
                 <label for="input-pic_url" class="col-sm-2 control-label" min="0">物品图片</label>
                 <div class="col-sm-10">
-                    <input type="url" name="picUrl" class="form-control" id="input-pic_url" style="width:80%;display:inline;" placeholder="图片链接" readonly="true" value="{{ adminpage.picUrl }}" required>
-                    {% if isCreate %}
-                    <input type="file" name="uploadPic" multiple="multiple" class="btn btn-info" style="width:17%;float:right;" id="fileUploadBtn" onclick="uploadImage();" accept="image/*" />
-                    {% endif %}
+                    <input type="file" name="uploadPic" multiple="multiple" class="btn btn-info" style="width:17%;float:left;" id="fileUploadBtn" onclick="uploadImage();" accept="image/*" />
                 </div>
+                <div id="imgDisplay"></div>
             </div>
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     {% if isCreate %}
                     <button type="button" onclick="publishActivity();" class="btn btn-primary" id="publishBtn">发布</button>
-                    {% endif %}
-                    {% if isCreate or activity.status == 0 %}
-                    <button type="submit" class="btn btn-default" id="saveBtn">暂存</button>
                     {% endif %}
                     {% if isCreate %}
                     <button type="reset" class="btn btn-warning" id="resetBtn">重置</button>
@@ -155,7 +150,7 @@
     var locals = {
         status: urlParam.create ? -1 : 0,
         isCreate: urlParam.create,
-        adminpage_id: urlParam.id,
+        adminName: urlParam.adminName,
         now: new Date(),
         processResult: '',
         imgNum: 0,
@@ -209,11 +204,6 @@
             }, function (data) {
                 data.status = 0;
                 wrapDate(data, 'publishTime');
-                if (!locals.adminpage) {
-                    locals.adminpage = {};
-                } else {
-                    data.id = locals.adminpage.id;
-                }
                 updateObj(locals.adminpage, data);
                 if (checktime() && checkname() && checkticket()) {
                     locals.status = 1;
@@ -240,22 +230,65 @@
         //上传图片
         $('#fileUploadBtn').on('change', function () {
             var len = this.files.length;
-            if (len > 0 && (len + locals.imgNum) <= 9) {
-                for (var i = 0; i < len; i++){
-                    var form = new FormData();
-                    form.append('image', this.files[i]);
-                    api.postForm('/api/a/image/upload', form, function (imagePath) {
-                        locals.picUrl = imagePath + ";" + locals.picUrl;
-                        $("#input-pic_url")[0].value = locals.picUrl;
-                    }, dftFail);
-                }
-                locals.imgNum = len + locals.imgNum;
+            for (var i = 0; i < len; i++) {
+                var form = new FormData();
+                form.append('image', this.files[i]);
+                api.postForm('/api/a/image/upload', form, function (imagePath) {
+                    locals.picUrl = imagePath + ";" + locals.picUrl;
+                }, dftFail);
+            }
+            setImagePreviews();
+        });
+        $('#resetBtn').on('click', function(){
+            locals.imgNum = 0;
+            locals.picUrl = '';
+            document.getElementById("imgDisplay").innerHTML = "";
+        })
+    };
+
+    function setImagePreviews() {
+        var fileUpload = document.getElementById("fileUploadBtn");
+        var imgDisplay = document.getElementById("imgDisplay");
+        var fileList = fileUpload.files;
+        var len = fileList.length;
+        for (var i = locals.imgNum; i < (len + locals.imgNum); i++) {
+            imgDisplay.innerHTML += "<div style='float:left' > <img id='img" + i + "'  /> </div>";
+            var imgObjPreview = document.getElementById("img"+i);
+            if (fileUpload.files && fileUpload.files[i - locals.imgNum]) {
+                //火狐下，直接设img属性
+                imgObjPreview.style.display = 'block';
+                imgObjPreview.style.width = '150px';
+                imgObjPreview.style.height = '180px';
+                //imgObjPreview.src = fileUpload.files[0].getAsDataURL();
+                //火狐7以上版本不能用上面的getAsDataURL()方式获取，需要一下方式
+                imgObjPreview.src = window.URL.createObjectURL(fileUpload.files[i - locals.imgNum]);
             }
             else {
-                alert("单次发布上传图片数量不得多于9张！");
+                //IE下，使用滤镜
+                fileUpload.select();
+                var imgSrc = document.selection.createRange().text;
+                alert(imgSrc)
+                var localImagId = document.getElementById("img" + i);
+                //必须设置初始大小
+                localImagId.style.width = "150px";
+                localImagId.style.height = "180px";
+                //图片异常的捕捉，防止用户修改后缀来伪造图片
+                try {
+                    localImagId.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale)";
+                    localImagId.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = imgSrc;
+                }
+                catch (e) {
+                    alert("您上传的图片格式不正确，请重新选择!");
+                    return false;
+                }
+                imgObjPreview.style.display = 'none';
+                document.selection.empty();
             }
-        });
-    };
+        }
+        locals.imgNum += len;
+        return true;
+    }
+
 
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
@@ -286,15 +319,14 @@
         var index = obj.selectedIndex; // 选中索引
         var text = obj.options[index].text; // 选中文本
         data.type = $('#input-type-label').find("option:selected").text();//选中的文本
-        data.status = 1;
         wrapDate(data, 'publishTime');
         if (!locals.adminpage) {
             locals.adminpage = {};
         } else {
-            data.id = locals.adminpage.id;
+            data.publisherId = locals.adminpage.id;
         }
+        data.picUrl = locals.picUrl;
         updateObj(locals.adminpage, data);
-        console.log(data);
         if (1) {
             locals.status = 1;
             locals.processResult = '';

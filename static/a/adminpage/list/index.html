@@ -54,11 +54,11 @@
 
 <script type="text/template" id="tpl-nav-li">
     <li class="active"><a class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/list">我的发布</a></li>
-    <li class="active"><a class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/detail?create=1">新建发布</a></li>
+    <li class="active"><a class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/detail?create=1&adminName={{adminpages.adminName }}">新建发布</a></li>
 </script>
 
 <script type="text/template" id="tpl-nav-li-right">
-    <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px; color: #9B9B9B" >我是某某管理员</a></li>
+    <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px; color: #9B9B9B" >{{  adminpages.adminName }}</a></li>
     <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px;" onclick="logout()" >注销</a></li>
 </script>
 
@@ -76,34 +76,20 @@
                 <a class="btn btn-default" href="/a/activity/menu">设置菜单</a>
             </div>
              -->
-            {% for act in adminpages %}
+            {% for act in adminpages.list %}
             <table class="table table-hover" style="margin-top: 5px; margin-bottom: 25px;">
 
                 <tr id="act-{{ act.id }}" style="background-color: #DFDFDF;">
-                    <td>状态：{{ getSmartStatus(act) }}</td>
-                    <td>上传日期:
-                    {{ getSmartTimeRange(act.publishTime) }}
-                    </td>
                     <td>类型：{{ act.type }}</td>
-
                     <td>操作</td>
                     <td></td>
                 </tr>
-
-
                 <tr id="tbody-activities">
-                    <td style="width:20%; height: 50%;">
-                        <img src="{{ act.picUrl0 }}" style="width: 250px; height: 180px;" />
-                    </td>
-                    <td>
-                        <img src="{{ act.picUrl1 }}" style="width: 250px; height: 180px;" />
-                    </td>
-                    <td>
-                        <img src="{{ act.picUrl2 }}" style="width: 250px; height: 180px;" />
-                    </td>
-                    <td>
-                        <img src="{{ act.picUrl3 }}" style="width: 250px; height: 180px;" />
-                    </td>
+                    {% for img in act.picUrl %}
+                        <td style="width:20%; height: 50%;">
+                            <img src="{{ img }}" style="width: 250px; height: 180px;" />
+                        </td>
+                    {% endfor %}
                 </tr>
 
             </table>
@@ -146,7 +132,7 @@
 
 <script>
     var locals = {
-        adminpages: []
+        adminpages: {}
     };
     var renderTemplate = function (name) {
         $('#' + name).html(swig.render($('#tpl-' + name).html(), {locals: locals}));
