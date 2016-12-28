@@ -83,14 +83,14 @@ class LostList(APIView):
             temp = {}
             temp['id'] = lost.id
             temp['name'] = lost.name
-            temp['contacts'] = lost.contacts
-            temp['contactNumber'] = lost.contactNumber
-            temp['contactType'] = lost.contactType
             temp['description'] = lost.description
             temp['lostTime'] = mktime(lost.lostTime.timetuple())
             temp['lostPlace'] = lost.lostPlace
             temp['picUrl'] = lost.picUrl
-            temp['reward'] = lost.reward
+            if lost.latitude != 0:
+                temp['lat'] = lost.latitude
+            if lost.longitude != 0:
+                temp['lng'] = lost.longitude
             items.append(temp)
         items.sort(key=lambda x: x["lostTime"])
         return items
