@@ -77,19 +77,26 @@
             </div>
              -->
             {% for act in adminpages.list %}
-            <table class="table table-hover" style="margin-top: 5px; margin-bottom: 25px;">
+            <table class="table table-hover" style="margin-top: 5px; margin-bottom: 25px; z-index: 10;">
 
-                <tr id="act-{{ act.id }}" style="background-color: #DFDFDF;">
-                    <td>类型：{{ act.type }}</td>
-                    <td>操作</td>
-                    <td></td>
-                </tr>
-                <tr id="tbody-activities">
-                    {% for img in act.picUrl %}
-                        <td style="width:20%; height: 50%;">
+                <div id="act-{{ act.id }}" style="background-color: #DFDFDF; width: 100%; height: 40px; padding-top: 10px; font-size: medium; font-family: "微软雅黑", "黑体", "宋体"; ">
+                    <div style="float: left;">类型：{{ act.type }}</div>
+                    <div style="float: right; padding-right: 40%;">发布时间: {{ act.publishTime.yyyymmdd() }}</div>
+                    <div class="td-delete" style="float: right; right: 1%;">操作:
+                        <a href="javascript:;" id="del-{{ act.id }}" onclick="deleteact({{ act.id }})">
+                            <span id="delete-activity" class="glyphicon glyphicon-trash"></span>
+                        </a>
+                    </div>
+                    
+                </div>
+                <tr id="tbody-activities" style="z-index:1; overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */ text-overflow:ellipsis;/* 当对象内文本溢出时显示省略标记(...) ；需与overflow:hidden;一起使用*/">
+
+                    {% for img in act.picUrl%}
+                        <td style="width:20%; height: 50%;  ">
                             <img src="{{ img }}" style="width: 250px; height: 180px;" />
                         </td>
                     {% endfor %}
+
                 </tr>
 
             </table>
@@ -133,6 +140,7 @@
 <script>
     var locals = {
         adminpages: {}
+
     };
     var renderTemplate = function (name) {
         $('#' + name).html(swig.render($('#tpl-' + name).html(), {locals: locals}));
@@ -150,10 +158,15 @@
         render();
         loginRequired(function () {
             api.get('/api/a/adminpage/list', {}, function (data) {
-                $.each(data, function (i, act) {
-                    updateDate(act, 'publishTime');
+
+                $.each(data, function (i, act){
+                    console.log(act);
+                    for(var i in act){
+                        updateDate(act[i], 'publishTime');
+                    }
                 });
                 locals.adminpages = data;
+                acc = locals
                 render();
             }, dftFail);
         });

@@ -41,23 +41,22 @@ class FoundList(APIView):
 
 #失物找领列表的搜索
 class FoundListSearch(APIView):
-    def divKey(self, contact1):
-        count = 0
+    def divKey(self, content):
+
         inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        contactKeyWord = list(jieba.analyse.extract_tags(contact1, topK=25))
-        for item1 in contactKeyWord:
-            for item2 in inputKeyWord:
-                if item1 == item2:
-                    count += 1
-                    print(item1)
-        return count
+        contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
+        intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
+        union = list(set(inputKeyWord).union(set(contactKeyWord)))
+        value = len(intersection.length) / len(union)
+
+        return value
 
 
     def get(self):
         self.check_input('Content')
 
         items = []
-        guanjianzi = list(jieba.analyse.extract_tags("黑色的钱包", topK=25))
+        guanjianzi = list(jieba.analyse.extract_tags("黑色的钱包是黑色的，若不是黑色的钱包", topK=25))
         print(guanjianzi)
         keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
         print(keys)
@@ -73,11 +72,14 @@ class FoundListSearch(APIView):
             temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
-            if self.divKey(found.contacts) > 0:
+            temp['divNum'] = self.divKey(found.description+found.name)
+
+            if self.divKey(found.description+found.name) > 0:
                 items.append(temp)
+
                 result['keys'] = keys
                 result['items'] = items
-        items.sort(key=lambda x: x["foundTime"])
+        items.sort(key=lambda x: x["divNum"], reverse=True)
         return result
 
 
