@@ -7,7 +7,7 @@ from time import mktime
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
-from wechat.models import AdminLost
+from wechat.models import AdminLost, publisherIdToPlaces
 from LostAndFound.settings import CONFIGS
 
 class userLogin(APIView):
@@ -38,14 +38,11 @@ class userLogout(APIView):
 
 class newAdminLost(APIView):
     def post(self):
-        self.check_input('type', 'picUrl0','picUrl1','picUrl2','picUrl3')
+        self.check_input('type', 'picUrl')
         adminLost = AdminLost(type=self.input['type'],
-                              picUrl0=self.input['picUrl0'],
-                              picUrl1=self.input['picUrl1'],
-                              picUrl2=self.input['picUrl2'],
-                              picUrl3=self.input['picUrl3'],
+                              picUrl=self.input['picUrl'],
+                              publisherId=self.request.user.id,
                               publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
-
         adminLost.save()
         return 0
 
@@ -62,21 +59,23 @@ class adminLostList(APIView):
     def get(self):
         items = []
         for lost in AdminLost.objects.all():
-            print(lost.id)
-
             temp = {}
             temp['id'] = lost.id
-            temp['status'] = lost.status
             temp['type'] = lost.type
             temp['publishTime'] = mktime(lost.publishTime.timetuple())
-            temp['picUrl0'] = lost.picUrl0
-            temp['picUrl1'] = lost.picUrl1
-            temp['picUrl2'] = lost.picUrl2
-            temp['picUrl3'] = lost.picUrl3
+            temp['picUrl'] = lost.picUrl.split(";")
+            temp['picUrl'].pop()
             items.append(temp)
-        return items
+        info = {}
+        info['adminName'] = publisherIdToPlaces[self.request.user.id]
+        info['list'] = items
+        return info
 
 # 需传回要删除的失物id
-class deleteActivity(APIView):
+class deleteAdminLost(APIView):
     def post(self):
         AdminLost.objects.filter(id=self.input['id']).update(status = 1);
+
+class adminLostDetail(APIView):
+    def get(self):
+        return publisherIdToPlaces[self.request.user.id]

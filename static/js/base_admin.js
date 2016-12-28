@@ -12,9 +12,7 @@ window.loginRequired = function (cb) {
 
 window.logout = function () {
     api.post('/api/a/logout', {}, null, dftFail, function () {
-        window.location.href = '/a/login?' + $.param({
-            next: window.location.pathname_with_query_string()
-        });
+        window.location.href = '/a/login';
     });
 };
 
