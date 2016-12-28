@@ -9,8 +9,9 @@ from wechat.wrapper import WeChatLib
 #分词
 #import sys
 #sys.path.append('jieba/')
-from userpage.jieba.jieba.analyse.textrank import TextRank
+from userpage.jieba.jieba.analyse import textrank
 from userpage.jieba import jieba
+
 #import jieba
 #import jieba.analyse
 #jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
@@ -42,8 +43,8 @@ class FoundList(APIView):
 class FoundListSearch(APIView):
     def divKey(self, contact1):
         count = 0
-        inputKeyWord = list(TextRank.textrank(self.input['Content'], topK=25))
-        contactKeyWord = list(TextRank.textrank(contact1, topK=25))
+        inputKeyWord = list(textrank.TextRank.textrank(self.input['Content'], topK=25))
+        contactKeyWord = list(textrank.TextRank.textrank(contact1, topK=25))
         for item1 in contactKeyWord:
             for item2 in inputKeyWord:
                 if item1 == item2:
@@ -54,8 +55,12 @@ class FoundListSearch(APIView):
     @property
     def get(self):
         self.check_input('Content')
+
         items = []
-        keys = list(TextRank.textrank(self.input['Content'], topK=25))
+        re = textrank.TextRank.extract_tags("紫色的学生卡、黑色的钱包", topK=25)
+        print(list(re))
+        keys = list(textrank.TextRank.textrank(self.input['Content'], topK=25))
+        print(keys)
         result = {}
         for found in Found.objects.filter(status=0):
             temp = {}
