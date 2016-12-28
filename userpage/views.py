@@ -43,8 +43,8 @@ class FoundList(APIView):
 class FoundListSearch(APIView):
     def divKey(self, contact1):
         count = 0
-        inputKeyWord = list(jieba.cut(self.input['Content'], cut_all=False))
-        contactKeyWord = list(jieba.cut(contact1, cut_all=False))
+        inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        contactKeyWord = list(jieba.analyse.extract_tags(contact1, topK=25))
         for item1 in contactKeyWord:
             for item2 in inputKeyWord:
                 if item1 == item2:
@@ -57,10 +57,9 @@ class FoundListSearch(APIView):
         self.check_input('Content')
 
         items = []
-        re = list(jieba.cut("黑色的钱包", cut_all=False))
-        print(re)
-
-        keys = list(jieba.cut(self.input['Content'], cut_all=False))
+        guanjianzi = list(jieba.analyse.extract_tags("黑色的钱包", topK=25))
+        print(guanjianzi)
+        keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
         print(keys)
         result = {}
         for found in Found.objects.filter(status=0):
