@@ -1,8 +1,8 @@
 # encoding=utf-8
 from __future__ import absolute_import
 import os
-from userpage.jieba import jieba
-from userpage.jieba.jieba import posseg
+from jieba import jieba
+from jieba.jieba import posseg
 from operator import itemgetter
 
 _get_module_path = lambda path: os.path.normpath(os.path.join(os.getcwd(),
