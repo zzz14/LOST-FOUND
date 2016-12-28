@@ -10,7 +10,7 @@ class CustomWeChatView(WeChatView):
     lib = WeChatLib(WECHAT_TOKEN, WECHAT_APPID, WECHAT_SECRET)
 
     handlers = [
-        HelpHandler, LostHandler, FoundHandler, AdminLostHandler, MyLostHandler, MyFoundHandler
+        HelpHandler, LostHandler, FoundHandler, AdminLostHandler, MineHandler
     ]
     error_message_handler = ErrorHandler
     default_handler = DefaultHandler
@@ -37,13 +37,8 @@ class CustomWeChatView(WeChatView):
                     },
                     {
                         "type": "click",
-                        "name": "我的失物",
-                        "key": "MY_LOST",
-                    },
-                    {
-                        "type": "click",
-                        "name": "我的拾物",
-                        "key": "MY_FOUND",
+                        "name": "我的",
+                        "key": "MINE",
                     },
                     {
                         "type": "click",
