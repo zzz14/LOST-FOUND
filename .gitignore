@@ -68,5 +68,5 @@ target/
 /configs.json
 
 # Pictures
-.jpg
-.png
+*.jpg
+*.png

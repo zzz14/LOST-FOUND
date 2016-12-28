@@ -24,7 +24,7 @@ class Lost(models.Model):
     latitude = models.FloatField(default=0)
     reward = models.CharField(max_length=128, default=None)
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    picUrl = models.CharField(max_length=256, default=None)
+    picUrl = models.CharField(max_length=256, default=None, null=True,blank=True)
     status = models.IntegerField(default=0)
 
 class Found(models.Model):
@@ -39,7 +39,7 @@ class Found(models.Model):
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
     user = models.ForeignKey(User,on_delete=models.CASCADE,default=None)
-    picUrl = models.CharField(max_length=256, default=None)
+    picUrl = models.CharField(max_length=256, default=None, null=True,blank=True)
     status = models.IntegerField(default=0)
 
 # 失物招领处的失物
@@ -47,7 +47,7 @@ class AdminLost(models.Model):
     type = models.CharField(max_length=64, db_index=True)
     publisherId = models.IntegerField(default=0)
     picUrl = models.CharField(max_length=4096, default=None)
-    publishTime = models.DateTimeField(db_index=True)
+    publishTime = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
 
 publisherIdToPlaces = {

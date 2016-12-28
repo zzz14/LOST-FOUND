@@ -98,6 +98,9 @@ class WeChatHandler(object):
     def url_found_list(self):
         return settings.get_url('u/found/list', {'user': self.user.open_id})
 
+    def url_mine(self):
+        return settings.get_url('u/mine',{'user':self.user.open_id})
+
 
 class WeChatEmptyHandler(WeChatHandler):
 

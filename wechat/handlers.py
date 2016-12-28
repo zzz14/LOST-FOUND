@@ -73,26 +73,14 @@ class AdminLostHandler(WeChatHandler):
             'Url': SITE_DOMAIN + '/u/school_office/list',
         })
 
-class MyLostHandler(WeChatHandler):
+class MineHandler(WeChatHandler):
 
     def check(self):
-        return self.is_event_click('MY_LOST')
+        return self.is_event_click('MINE')
 
     def handle(self):
         return self.reply_single_news({
             'Title': '我的失物',
             'Description': '看看你丢了多少东西',
-            'Url': SITE_DOMAIN + '/u/mine/lost',
-        })
-
-class MyFoundHandler(WeChatHandler):
-
-    def check(self):
-        return self.is_event_click('MY_FOUND')
-
-    def handle(self):
-        return self.reply_single_news({
-            'Title': '我的拾物',
-            'Description': '看看你捡了多少东西',
-            'Url': SITE_DOMAIN + '/u/mine/found',
+            'Url': self.url_mine(),
         })

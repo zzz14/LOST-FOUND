@@ -42,7 +42,7 @@ class newAdminLost(APIView):
         adminLost = AdminLost(type=self.input['type'],
                               picUrl=self.input['picUrl'],
                               publisherId=self.request.user.id,
-                              publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
+                              publishTime=time.time())
         adminLost.save()
         return 0
 
@@ -63,7 +63,7 @@ class adminLostList(APIView):
             temp = {}
             temp['id'] = lost.id
             temp['type'] = lost.type
-            temp['publishTime'] = mktime(lost.publishTime.timetuple())
+            temp['publishTime'] = lost.publishTime
             temp['picUrl'] = lost.picUrl.split(";")
             temp['picUrl'].pop()
             items.append(temp)

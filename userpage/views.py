@@ -8,14 +8,10 @@ from LostAndFound.settings import CONFIGS, STATIC_ROOT, get_url
 import urllib.request
 from wechat.wrapper import WeChatLib
 #分词
-#import sys
-#sys.path.append('jieba/')
+import jieba
 from userpage.jieba1.jieba.analyse.textrank import TextRank
 from userpage.jieba1 import jieba
 
-#import jieba
-#import jieba.analyse
-#jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
 jieba.set_dictionary('jieba/extra_dict/dict.txt.small')
 jieba.load_userdict("jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
 
@@ -146,8 +142,15 @@ class LostListSearch(APIView):
 class SchoolOfficeLostList(APIView):
     def get(self):
         items = []
-        '''if self.input['type'] and self.input['publisherId']:
-            for lost in AdminLost.objects.filter(status=0,type=self.input['type'],publisherId=self.input['publisherId']):
+        losts = AdminLost.objects.filter(publishTime__gte=self.input['startDate'])
+        print(self.input['startDate'])
+        print(self.input['endDate'])
+        losts = losts.exclude(publishTime__gte=self.input['endDate'])
+        if 'type' in self.input and\
+            self.input['type'] != "" and\
+            'publisherId' in self.input and\
+            self.input['publisherId'] != '0':
+            for lost in losts.filter(status=0,type=self.input['type'],publisherId=self.input['publisherId']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
                 for url in picUrl:
@@ -158,8 +161,10 @@ class SchoolOfficeLostList(APIView):
                     temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
                     temp['picUrl'] = url
                     items.append(temp)
-        elif self.input['type']:
-            for lost in AdminLost.objects.filter(status=0,type=self.input['type']):
+        elif 'type' in self.input and\
+            self.input['type'] != "":
+            print(2)
+            for lost in losts.filter(status=0,type=self.input['type']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
                 for url in picUrl:
@@ -170,8 +175,10 @@ class SchoolOfficeLostList(APIView):
                     temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
                     temp['picUrl'] = url
                     items.append(temp)
-        elif self.input['publisherId']:
-            for lost in AdminLost.objects.filter(status=0,publisherId=self.input['publisherId']):
+        elif 'publisherId' in self.input and\
+            self.input['publisherId'] != '0':
+            print(self.input['publisherId'])
+            for lost in losts.filter(status=0,publisherId=self.input['publisherId']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
                 for url in picUrl:
@@ -182,32 +189,36 @@ class SchoolOfficeLostList(APIView):
                     temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
                     temp['picUrl'] = url
                     items.append(temp)
-        for lost in AdminLost.objects.filter(status=0):
-            picUrl = lost.picUrl.split(';')
-            picUrl.pop()
-            for url in picUrl:
-                temp = {}
-                temp['id'] = lost.id
-                temp['place'] = publisherIdToPlaces[lost.publisherId]
-                temp['type'] = lost.type
-                temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
-                temp['picUrl'] = url
-                items.append(temp)
+        else:
+            print(4)
+            for lost in losts.filter(status=0):
+                picUrl = lost.picUrl.split(';')
+                picUrl.pop()
+                for url in picUrl:
+                    temp = {}
+                    temp['id'] = lost.id
+                    temp['place'] = publisherIdToPlaces[lost.publisherId]
+                    temp['type'] = lost.type
+                    temp['publishTime'] = time.strftime("%Y-%m-%d", time.localtime(lost.publishTime))
+                    temp['picUrl'] = url
+                    items.append(temp)
         items.sort(key=lambda x: x["place"])
         info = {}
         info['typeList'] = adminLostType
-        info['placeList'] = publisherIdToPlaces
+        info['placeList'] = list(publisherIdToPlaces.values())
         info['items'] = items
-        return info'''
+        return info
 
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
 # 前端须返回输入user
 class MineLost(APIView):
     def get(self):
+        self.check_input('user')
         items = []
-        for lost in Lost.objects.filter(user=self.input['user'], status=0):
+        for lost in Lost.objects.filter(user__open_id=self.input['user'], status=0):
             temp = {}
+            temp['id'] = lost.id
             temp['name'] = lost.name
             temp['contacts'] = lost.contacts
             temp['contactNumber'] = lost.contactNumber
@@ -226,9 +237,11 @@ class MineLost(APIView):
 # 前端须返回输入user
 class MineFound(APIView):
     def get(self):
+        self.check_input('user')
         items = []
-        for found in Found.objects.filter(status=0):
+        for found in Found.objects.filter(user__open_id=self.input['user'],status=0):
             temp = {}
+            temp['id'] = found.id
             temp['name'] = found.name
             temp['contacts'] = found.contacts
             temp['contactNumber'] = found.contactNumber
@@ -254,6 +267,99 @@ class DeleteMineLost(APIView):
 class DeleteMineFound(APIView):
     def get(self):
         Found.objects.filter(id=self.input['id']).update(status=1)
+
+class ModifyLost(APIView):
+    def get(self):
+        self.check_input('user','id')
+        lost = Lost.objects.get(id=self.input['id'],user__open_id=self.input['user'])
+        temp = {}
+        temp['id'] = lost.id
+        temp['itemName'] = lost.name
+        temp['contacts'] = lost.contacts
+        temp['contactNumber'] = lost.contactNumber
+        temp['contactType'] = lost.contactType
+        temp['itemDescription'] = lost.description
+        temp['lostTime'] = mktime(lost.lostTime.timetuple())
+        temp['lostPlace'] = lost.lostPlace
+        temp['picUrl'] = lost.picUrl
+        temp['reward'] = lost.reward
+        return temp
+
+    def post(self):
+        self.check_input('name', 'contacts', 'contactType', 'contactNumber', \
+                         'description', 'lostTime', 'lostPlace', 'reward', 'user', 'id')
+        lost = Lost.objects.get(id=self.input['id'], user__open_id=self.input['user'])
+        lost.name = self.input['name']
+        lost.description = self.input['description']
+        lost.contacts = self.input['contacts']
+        lost.contactNumber = self.input['contactNumber']
+        lost.contactType = self.input['contactType']
+        lost.lostTime = self.input['lostTime']
+        lost.lostPlace = self.input['lostPlace']
+        lost.reward = self.input['reward']
+        if 'media_id' in self.input:
+            getData = {}
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
+            getData['media_id'] = self.input['media_id']
+            data = urllib.parse.urlencode(getData)
+            url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
+            pic = urllib.request.urlopen(url)
+            pic_name = self.input['media_id'] + '.jpg'
+            pic_path = os.path.join('img', 'lost', pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT, pic_path)
+            lost.picUrl = get_url(pic_path)
+            f = open(pic_full_path, 'wb')
+            # TODO
+            f.write(pic.read())
+            f.close()
+        lost.save()
+
+
+class ModifyFound(APIView):
+    def get(self):
+        self.check_input('user', 'id')
+        found = Found.objects.get(id=self.input['id'], user__open_id=self.input['user'])
+        temp = {}
+        temp['id'] = found.id
+        temp['name'] = found.name
+        temp['contacts'] = found.contacts
+        temp['contactNumber'] = found.contactNumber
+        temp['contactType'] = found.contactType
+        temp['description'] = found.description
+        temp['lostTime'] = mktime(found.lostTime.timetuple())
+        temp['lostPlace'] = found.lostPlace
+        temp['picUrl'] = found.picUrl
+        temp['reward'] = found.reward
+        return temp
+
+    def post(self):
+        self.check_input('name', 'contacts', 'contactType', 'contactNumber', \
+                         'description', 'lostTime', 'lostPlace', 'reward', 'user', 'id')
+        found = Found.objects.get(id=self.input['id'], user__open_id=self.input['user'])
+        found.name = self.input['name']
+        found.description = self.input['description']
+        found.contacts = self.input['contacts']
+        found.contactNumber = self.input['contactNumber']
+        found.contactType = self.input['contactType']
+        found.lostTime = self.input['lostTime']
+        found.lostPlace = self.input['lostPlace']
+        found.reward = self.input['reward']
+        if 'media_id' in self.input:
+            getData = {}
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
+            getData['media_id'] = self.input['media_id']
+            data = urllib.parse.urlencode(getData)
+            url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
+            pic = urllib.request.urlopen(url)
+            pic_name = self.input['media_id'] + '.jpg'
+            pic_path = os.path.join('img', 'lost', pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT, pic_path)
+            found.picUrl = get_url(pic_path)
+            f = open(pic_full_path, 'wb')
+            # TODO
+            f.write(pic.read())
+            f.close()
+        found.save()
 
 
 # 拾物详情页
