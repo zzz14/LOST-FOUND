@@ -1,10 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="weui.css" />
+    <script src="weui.min.js"></script>
+    <script src="jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=5F1YoiVMkVZxB0PkegE8vb60Hl0rPIzc"></script>
+    <title>失物招领处</title>
+    <style type="text/css">
+    .html .body {
+        width: 100%
+    }
+
+    .item-container {
+        margin: 10px;
+    }
+
+    .item {
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        display: inline-block;
+        width: 42%;
+        position: relative;
+        margin: 3%;
+        border: 1px solid #e6e6e7;
+        font-size: 11px;
+        color: #666666
+    }
+    </style>
 </head>
-<body>
-$END$
+
+<body style="background-color:#f9f9f9">
+<div id="top"></div>
+<div id="items"></div>
+
+
 </body>
+
+<script type="text/template" id="tpl-top">
+    <div class="navbar" style="background-color: white">
+        <div class="weui-cell weui-cell_select">
+            <select class="weui-select" name="place" style="font-size:13px;width:25%">
+                <option value="0"></option>
+                <option value="1">紫荆园</option>
+                <option value="2">桃李园</option>
+                <option value="3">六教</option>
+            </select>
+            <select class="weui-select" name="tag" style="font-size:13px;width:25%">
+                <option value="0"></option>
+                <option value="1">生活用品</option>
+                <option value="2">学生卡</option>
+                <option value="3">钥匙</option>
+            </select>
+            <div class="weui-cell__bd" style="font-size:13px;width:25%">
+                <input class="weui-input" type="date" value="" placeholder="">
+            </div>
+            <div class="weui-cell__bd" style="font-size:13px;width:25%">
+                <input class="weui-input" type="date" value="" placeholder="">
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="tpl-items">
+<div class="item-container">
+    {% for item in items %}
+        <div class="item">
+            <img src="{{ item.picUrl }}" style="width:100%">
+            <div class="item_detail" style="background-color:white; padding:8px">
+                <p>{{ item.place }} <img src="location2.png" style="vertical-align:top"> {{ item.type }} <img src="tag.png" style="width:9%; vertical-align:top"></p>
+                <p>{{ item.time }}</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+</script>
+
+
+<script src="/3rd/jquery.js"></script>
+<script src="/3rd/swig.js"></script>
+<script src="/js/weixin_lib.js"></script>
+<script src="/js/base.js"></script>
+
 </html>
