@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import os
 import re
 import sys
-from userpage.jieba import jieba
+from jieba import jieba
 import pickle
 from .._compat import *
 from .viterbi import viterbi

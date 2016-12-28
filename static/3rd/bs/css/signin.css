@@ -5,7 +5,7 @@
 }
 .content-style{
   background-color: #fbf9f1;
-  background: url("/img/bg.png");
+  background: url("/img/bg.png") repeat;
   -webkit-background-image: url("/img/bg.png");
 }
 .logo-style{

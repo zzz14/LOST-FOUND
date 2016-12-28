@@ -3,8 +3,9 @@
 }
 .content-style{
   background-color: #fbf9f1;
-  background: url("/img/bg.png");
+  background: url("/img/bg.png") repeat;
   -webkit-background-image: url("/img/bg.png");
+    background-size:100%;
 }
 .logo-style{
   -moz-border-radius: 50%;

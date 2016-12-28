@@ -10,13 +10,14 @@ from wechat.wrapper import WeChatLib
 #分词
 #import sys
 #sys.path.append('jieba/')
-from userpage.jieba.jieba.analyse.textrank import TextRank
-from userpage.jieba import jieba
+from jieba.jieba.analyse.textrank import TextRank
+from jieba import jieba
+
 #import jieba
 #import jieba.analyse
 #jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
-jieba.set_dictionary('userpage/jieba/extra_dict/dict.txt.small')
-jieba.load_userdict("userpage/jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
+jieba.set_dictionary('jieba/extra_dict/dict.txt.small')
+jieba.load_userdict("jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
 
 
 # 点击“丢了东西”后出现的列表（被拾到东西的列表）
@@ -43,8 +44,8 @@ class FoundList(APIView):
 class FoundListSearch(APIView):
     def divKey(self, contact1):
         count = 0
-        inputKeyWord = list(TextRank.textrank(self.input['Content'], topK=25))
-        contactKeyWord = list(TextRank.textrank(contact1, topK=25))
+        inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        contactKeyWord = list(jieba.analyse.extract_tags(contact1, topK=25))
         for item1 in contactKeyWord:
             for item2 in inputKeyWord:
                 if item1 == item2:
@@ -52,23 +53,28 @@ class FoundListSearch(APIView):
                     print(item1)
         return count
 
-    @property
+
     def get(self):
         self.check_input('Content')
+
         items = []
-        keys = list(TextRank.textrank(self.input['Content'], topK=25))
+        guanjianzi = list(jieba.analyse.extract_tags("黑色的钱包", topK=25))
+        print(guanjianzi)
+        keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        print(keys)
         result = {}
         for found in Found.objects.filter(status=0):
             temp = {}
             temp['id'] = found.id
             temp['name'] = found.name
-            temp['key'] = found.key
-            temp['contact'] = found.contact
+            temp['contacts'] = found.contacts
+            temp['contactNumber'] = found.contactNumber
+            temp['contactType'] = found.contactType
             temp['description'] = found.description
-            temp['foundTime'] = found.foundTime
+            temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
-            if self.divKey(found.contact) > 0:
+            if self.divKey(found.contacts) > 0:
                 items.append(temp)
                 result['keys'] = keys
                 result['items'] = items
