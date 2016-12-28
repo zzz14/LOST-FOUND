@@ -70,3 +70,6 @@ target/
 # Pictures
 *.jpg
 *.png
+
+# migrations
+/wechat/migrations/
