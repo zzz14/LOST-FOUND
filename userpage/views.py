@@ -10,8 +10,8 @@ from wechat.wrapper import WeChatLib
 #分词
 #import sys
 #sys.path.append('jieba/')
-from jieba.jieba.analyse.textrank import TextRank
-from jieba import jieba
+from userpage.jieba1.jieba.analyse.textrank import TextRank
+from userpage.jieba1 import jieba
 
 #import jieba
 #import jieba.analyse
@@ -42,23 +42,20 @@ class FoundList(APIView):
 
 #失物招领列表的搜索
 class FoundListSearch(APIView):
-    def divKey(self, content):
 
+    def divKey(self, content):
         inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
         contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
+        print(contactKeyWord)
         intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
         union = list(set(inputKeyWord).union(set(contactKeyWord)))
-        value = len(intersection.length) / len(union)
-
+        value = len(intersection) / len(union)
         return value
 
 
     def get(self):
         self.check_input('Content')
-
         items = []
-        guanjianzi = list(jieba.analyse.extract_tags("黑色的钱包是黑色的，若不是黑色的钱包", topK=25))
-        print(guanjianzi)
         keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
         print(keys)
         result = {}
@@ -73,11 +70,11 @@ class FoundListSearch(APIView):
             temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
-            temp['divNum'] = self.divKey(found.description+found.name)
-
-            if self.divKey(found.description+found.name) > 0:
+            content = found.description+found.name
+            temp['divNum'] = self.divKey(content)
+            print(temp['divNum'])
+            if self.divKey(content) > 0:
                 items.append(temp)
-
                 result['keys'] = keys
                 result['items'] = items
         items.sort(key=lambda x: x["divNum"], reverse=True)
