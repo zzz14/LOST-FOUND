@@ -47,7 +47,7 @@ class AdminLost(models.Model):
     type = models.CharField(max_length=64, db_index=True)
     publisherId = models.IntegerField(default=0)
     picUrl = models.CharField(max_length=4096, default=None)
-    publishTime = models.DateTimeField(db_index=True)
+    publishTime = models.IntegerField(default=0)
     status = models.IntegerField(default=0)
 
 publisherIdToPlaces = {

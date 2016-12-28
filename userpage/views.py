@@ -107,8 +107,15 @@ class LostList(APIView):
 class SchoolOfficeLostList(APIView):
     def get(self):
         items = []
-        '''if self.input['type'] and self.input['publisherId']:
-            for lost in AdminLost.objects.filter(status=0,type=self.input['type'],publisherId=self.input['publisherId']):
+        losts = AdminLost.objects.filter(publishTime__gte=self.input['startDate'])
+        print(self.input['startDate'])
+        print(self.input['endDate'])
+        losts = losts.exclude(publishTime__gte=self.input['endDate'])
+        if 'type' in self.input and\
+            self.input['type'] != "" and\
+            'publisherId' in self.input and\
+            self.input['publisherId'] != '0':
+            for lost in losts.filter(status=0,type=self.input['type'],publisherId=self.input['publisherId']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
                 for url in picUrl:
@@ -119,8 +126,10 @@ class SchoolOfficeLostList(APIView):
                     temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
                     temp['picUrl'] = url
                     items.append(temp)
-        elif self.input['type']:
-            for lost in AdminLost.objects.filter(status=0,type=self.input['type']):
+        elif 'type' in self.input and\
+            self.input['type'] != "":
+            print(2)
+            for lost in losts.filter(status=0,type=self.input['type']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
                 for url in picUrl:
@@ -131,8 +140,10 @@ class SchoolOfficeLostList(APIView):
                     temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
                     temp['picUrl'] = url
                     items.append(temp)
-        elif self.input['publisherId']:
-            for lost in AdminLost.objects.filter(status=0,publisherId=self.input['publisherId']):
+        elif 'publisherId' in self.input and\
+            self.input['publisherId'] != '0':
+            print(self.input['publisherId'])
+            for lost in losts.filter(status=0,publisherId=self.input['publisherId']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
                 for url in picUrl:
@@ -143,23 +154,25 @@ class SchoolOfficeLostList(APIView):
                     temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
                     temp['picUrl'] = url
                     items.append(temp)
-        for lost in AdminLost.objects.filter(status=0):
-            picUrl = lost.picUrl.split(';')
-            picUrl.pop()
-            for url in picUrl:
-                temp = {}
-                temp['id'] = lost.id
-                temp['place'] = publisherIdToPlaces[lost.publisherId]
-                temp['type'] = lost.type
-                temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
-                temp['picUrl'] = url
-                items.append(temp)
+        else:
+            print(4)
+            for lost in losts.filter(status=0):
+                picUrl = lost.picUrl.split(';')
+                picUrl.pop()
+                for url in picUrl:
+                    temp = {}
+                    temp['id'] = lost.id
+                    temp['place'] = publisherIdToPlaces[lost.publisherId]
+                    temp['type'] = lost.type
+                    temp['publishTime'] = time.strftime("%Y-%m-%d", time.localtime(lost.publishTime))
+                    temp['picUrl'] = url
+                    items.append(temp)
         items.sort(key=lambda x: x["place"])
         info = {}
         info['typeList'] = adminLostType
-        info['placeList'] = publisherIdToPlaces
+        info['placeList'] = list(publisherIdToPlaces.values())
         info['items'] = items
-        return info'''
+        return info
 
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
