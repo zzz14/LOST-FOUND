@@ -1,8 +1,9 @@
 import os
+import time
 from time import mktime
 from codex.baseview import APIView
 from django.conf import settings
-from wechat.models import Lost, Found, AdminLost, publisherIdToPlaces, User
+from wechat.models import Lost, Found, AdminLost, publisherIdToPlaces, adminLostType, User
 from LostAndFound.settings import CONFIGS, STATIC_ROOT, get_url
 import urllib.request
 from wechat.wrapper import WeChatLib
@@ -39,7 +40,7 @@ class FoundList(APIView):
         items.sort(key=lambda x: x["foundTime"])
         return items
 
-#失物找领列表的搜索
+#失物招领列表的搜索
 class FoundListSearch(APIView):
     def divKey(self, content):
 
@@ -105,19 +106,62 @@ class LostList(APIView):
 
 
 # 学校失物招领处失物列表
-# 内容还没写
 class SchoolOfficeLostList(APIView):
     def get(self):
         items = []
+        '''if self.input['type'] and self.input['publisherId']:
+            for lost in AdminLost.objects.filter(status=0,type=self.input['type'],publisherId=self.input['publisherId']):
+                picUrl = lost.picUrl.split(';')
+                picUrl.pop()
+                for url in picUrl:
+                    temp = {}
+                    temp['id'] = lost.id
+                    temp['place'] = publisherIdToPlaces[lost.publisherId]
+                    temp['type'] = lost.type
+                    temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
+                    temp['picUrl'] = url
+                    items.append(temp)
+        elif self.input['type']:
+            for lost in AdminLost.objects.filter(status=0,type=self.input['type']):
+                picUrl = lost.picUrl.split(';')
+                picUrl.pop()
+                for url in picUrl:
+                    temp = {}
+                    temp['id'] = lost.id
+                    temp['place'] = publisherIdToPlaces[lost.publisherId]
+                    temp['type'] = lost.type
+                    temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
+                    temp['picUrl'] = url
+                    items.append(temp)
+        elif self.input['publisherId']:
+            for lost in AdminLost.objects.filter(status=0,publisherId=self.input['publisherId']):
+                picUrl = lost.picUrl.split(';')
+                picUrl.pop()
+                for url in picUrl:
+                    temp = {}
+                    temp['id'] = lost.id
+                    temp['place'] = publisherIdToPlaces[lost.publisherId]
+                    temp['type'] = lost.type
+                    temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
+                    temp['picUrl'] = url
+                    items.append(temp)
         for lost in AdminLost.objects.filter(status=0):
-            temp = {}
-            temp['id'] = lost.id
-            temp['place'] = publisherIdToPlaces[lost.id]
-            temp['type'] = lost.type
-            temp['publishTime'] = mktime(lost.publishTime.timetuple())
-            temp['picUrl'] = lost.picUrl
-            items.append(temp)
-        return items
+            picUrl = lost.picUrl.split(';')
+            picUrl.pop()
+            for url in picUrl:
+                temp = {}
+                temp['id'] = lost.id
+                temp['place'] = publisherIdToPlaces[lost.publisherId]
+                temp['type'] = lost.type
+                temp['publishTime'] = time.strftime("%Y-%m-%d", lost.publishTime.timetuple())
+                temp['picUrl'] = url
+                items.append(temp)
+        items.sort(key=lambda x: x["place"])
+        info = {}
+        info['typeList'] = adminLostType
+        info['placeList'] = publisherIdToPlaces
+        info['items'] = items
+        return info'''
 
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
