@@ -93,7 +93,7 @@
                 <li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url({{ locals.image.localId }})"></li>
             </ul>
             {% else %}
-            <div class="weui-uploader__input-box">
+            <div class="weui-uploader__input-box" style="width:100%;">
                 <input id="uploadPic" class="weui-uploader__input" onclick="m_chooseImage()" multiple />
             </div>
             {% endif %}

@@ -25,6 +25,7 @@ class FoundList(APIView):
         items = []
         for found in Found.objects.filter(status=0):
             temp = {}
+            temp['id'] = found.id
             temp['name'] = found.name
             temp['contacts'] = found.contacts
             temp['contactNumber'] = found.contactNumber
@@ -57,6 +58,7 @@ class FoundListSearch(APIView):
         result = {}
         for found in Found.objects.filter(status=0):
             temp = {}
+            temp['id'] = found.id
             temp['name'] = found.name
             temp['key'] = found.key
             temp['contact'] = found.contact
@@ -78,6 +80,7 @@ class LostList(APIView):
         items = []
         for lost in Lost.objects.filter(status=0):
             temp = {}
+            temp['id'] = lost.id
             temp['name'] = lost.name
             temp['contacts'] = lost.contacts
             temp['contactNumber'] = lost.contactNumber
@@ -183,7 +186,8 @@ class FoundDetail(APIView):
 # 需提供失物的id
 class LostDetail(APIView):
     def get(self):
-        lost = Lost.objects.get(id=self.input('id'))
+        self.check_input('id')
+        lost = Lost.objects.get(id=self.input['id'])
         temp = {}
         temp['name'] = lost.name
         temp['contacts'] = lost.contacts
@@ -202,7 +206,8 @@ class LostDetail(APIView):
 class AdminLostDetail(APIView):
     def get(self):
         items = []
-        for lost in AdminLost.objects.GET(id = self.input['id']):
+        self.check_input('id')
+        for lost in AdminLost.objects.get(id = self.input['id']):
             temp = {}
             temp['id'] = lost.id
             temp['place'] = publisherIdToPlaces[lost.id]

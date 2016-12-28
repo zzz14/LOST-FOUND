@@ -44,8 +44,7 @@ class newAdminLost(APIView):
                               picUrl1=self.input['picUrl1'],
                               picUrl2=self.input['picUrl2'],
                               picUrl3=self.input['picUrl3'],
-                              publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())),
-                              status=self.input['status'])
+                              publishTime=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
 
         adminLost.save()
         return 0
