@@ -28,42 +28,6 @@
         font-size: 11px;
         color: #666666
     }
-
-    .placepicker:after {
-        content: "";
-        display: inline-block;
-        height: 6px;
-        width: 6px;
-        border-width: 0 2px 2px 0;
-        border-color: #C8C8CD;
-        border-style: solid;
-        -webkit-transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
-        transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
-        position: relative;
-        top: -2px;
-        position: absolute;
-        top: 50%;
-        left: 86px;
-        margin-top: -4px;
-    }
-
-    .tagpicker:after {
-        content: "";
-        display: inline-block;
-        height: 6px;
-        width: 6px;
-        border-width: 0 2px 2px 0;
-        border-color: #C8C8CD;
-        border-style: solid;
-        -webkit-transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
-        transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
-        position: relative;
-        top: -2px;
-        position: absolute;
-        top: 50%;
-        left: 177px;
-        margin-top: -4px;
-    }
     </style>
 </head>
 
@@ -73,7 +37,7 @@
 </div>
 <script type="text/template" id="tpl-mainbody">
     <div class="navbar" style="background-color: white; width:100%; border-bottom:1px solid #E6E6E7">
-        <div class="weui-cell" style="font-size:12px; width:100%">
+        <div class="weui-cell" style="font-size:12px;">
             <div class="placepicker" style="width:28%; padding:0 10px 0 10px; border-radius: 8px;border:1px solid #9e9e9e">
                 <select class="weui-select selector" id="placeItem" name="place" style="height:30px; line-height:30px;padding:0">
                     {% if selectedPlace %}<option>{{ selectedPlace }}</option><option>全部</option>
@@ -96,7 +60,7 @@
                     {% endif %}
                 </select>
             </div>
-            <div class="datepicker" style="width:auto; margin-left:10px">
+            <div class="datepicker" style="width:38%; margin:0 10px 0 10px">
                 <div class="weui-cell__bd" style="">
                     <input class="weui-input selector" id="startDate" type="date" value="{{ startDate }}" placeholder="">
                 </div>
@@ -127,8 +91,8 @@
     <script src="/js/base.js"></script>
 <script>
     var locals = {
-        startDate : "",
-        endDate : "",
+        startDate : "1970-01-01",
+        endDate : "2050-01-01",
     };
     var render = function () {
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
@@ -138,8 +102,8 @@
             locals.selectedPlaceId = locals.selectedPlace == "" ? 0 : locals.placeList.indexOf(locals.selectedPlace) + 1;
             locals.startDate = $("#startDate").val();
             locals.endDate = $("#endDate").val();
-            var sendStartDate = locals.startDate == "" ? 0 : ((new Date(Date.parse(locals.startDate.replace(/-/g,  "/")))).valueOf() / 1000),
-                sendEndDate = locals.endDate == "" ? (new Date('2050-01-01'.replace(/-/g, "/")).valueOf() / 1000) : ((new Date(Date.parse(locals.endDate.replace(/-/g,  "/")))).valueOf() / 1000);
+            var sendStartDate = (locals.startDate == "") ||  (locals.startDate == "请选择开始日期") ? 0 : ((new Date(Date.parse(locals.startDate.replace(/-/g,  "/")))).valueOf() / 1000),
+                sendEndDate = (locals.endDate == "") || (locals.endDate == "请选择结束日期") ? (new Date('2050-01-01'.replace(/-/g, "/")).valueOf() / 1000) : ((new Date(Date.parse(locals.endDate.replace(/-/g,  "/")))).valueOf() / 1000);
             api.get('/api/u/school_office/list',{
                 "publisherId":locals.selectedPlaceId,
                 "type":locals.selectedType,
