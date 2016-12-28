@@ -97,6 +97,46 @@ class LostList(APIView):
         items.sort(key=lambda x: x["lostTime"])
         return items
 
+# 失物招领列表的搜索
+class LostListSearch(APIView):
+
+    def divKey(self, content):
+        inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
+        print(contactKeyWord)
+        intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
+        union = list(set(inputKeyWord).union(set(contactKeyWord)))
+        value = len(intersection) / len(union)
+        return value
+
+    def get(self):
+        self.check_input('Content')
+        items = []
+        keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        print(keys)
+        result = {}
+        for lost in Lost.objects.filter(status=0):
+            temp = {}
+            temp['id'] = lost.id
+            temp['name'] = lost.name
+            temp['description'] = lost.description
+            temp['lostTime'] = mktime(lost.lostTime.timetuple())
+            temp['lostPlace'] = lost.lostPlace
+            temp['picUrl'] = lost.picUrl
+            if lost.latitude != 0:
+                temp['lat'] = lost.latitude
+            if lost.longitude != 0:
+                temp['lng'] = lost.longitude
+            content = lost.description + lost.name
+            temp['divNum'] = self.divKey(content)
+            print(temp['divNum'])
+            if self.divKey(content) > 0:
+                items.append(temp)
+                result['keys'] = keys
+                result['items'] = items
+        items.sort(key=lambda x: x["divNum"], reverse=True)
+        return result
+
 
 # 学校失物招领处失物列表
 class SchoolOfficeLostList(APIView):
