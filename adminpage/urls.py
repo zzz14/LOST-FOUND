@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^adminpage/list/?$', adminLostList.as_view()),
     url(r'^adminpage/detail/?$', newAdminLost.as_view()),
     url(r'^adminpage/create/?$', newAdminLost.as_view()),
+    url(r'^adminpage/delete/?$', deleteAdminLost.as_view()),
     url(r'^logout/?$', userLogout.as_view()),
 ]

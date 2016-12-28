@@ -58,6 +58,7 @@ class uploadImage(APIView):
 class adminLostList(APIView):
     def get(self):
         items = []
+
         for lost in AdminLost.objects.filter(status=0, publisherId=self.request.user.id):
             temp = {}
             temp['id'] = lost.id
@@ -74,7 +75,7 @@ class adminLostList(APIView):
 # 需传回要删除的失物id
 class deleteAdminLost(APIView):
     def post(self):
-        AdminLost.objects.filter(id=self.input['id']).update(status = 1);
+        AdminLost.objects.filter(id=self.input['id']).update(status = 1)
 
 class adminLostDetail(APIView):
     def get(self):

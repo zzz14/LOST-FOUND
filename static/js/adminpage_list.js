@@ -5,7 +5,7 @@
  * Time: 下午11:12
  */
 /*
-* changed by xiangzai
+*
  * 2016-12-23
  */
 var timeOffset = 0;
@@ -77,14 +77,16 @@ function expand_long_text(dom) {
 
 /*删除*/
 function deleteact(actid){
-    var i, len, curact, amdminpages = locals.amdminpages;
-    for(i = 0, len = amdminpages.length; i < len; ++i){
-        if(amdminpages[i].id == actid){
-            curact = amdminpages[i];
+    var i, len, curact, admpages = locals.adminpages;
+
+    for(i = 0, len = admpages.length; i < len; ++i){
+        if(admpages[i].id == actid){
+
+            curact = admpages[i];
             break;
         }
     }
-    var content = '确认删除<span style="color:red">'+getSmartStatus(curact)+'</span>发布信息？';
+    var content = '确认删除<span style="color:red">'+'</span>已发布信息？';
     $('#modalcontent').html(content);
     $('#act-'+actid).css("background-color","#FFE4C4");
     $('#deleteid').val(actid);
@@ -96,7 +98,8 @@ function deleteact(actid){
 
 function delConfirm(){
     var delid = $('#deleteid').val();
-    api.post('/api/a/activity/delete', {id: parseInt(delid)}, function () {
+    console.info("delid:%d", delid);
+    api.post('/api/a/adminpage/delete', {id: parseInt(delid)}, function () {
         window.location.reload();
     }, dftFail, function () {
         $('#act-'+delid).css("background-color","#FFF");

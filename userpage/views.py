@@ -8,16 +8,10 @@ from LostAndFound.settings import CONFIGS, STATIC_ROOT, get_url
 import urllib.request
 from wechat.wrapper import WeChatLib
 #分词
-#import sys
-#sys.path.append('jieba/')
-from jieba.analyse.textrank import TextRank
-#from jieba.jieba.analyse.textrank import TextRank
 import jieba
-#from jieba import jieba
+from userpage.jieba1.jieba.analyse.textrank import TextRank
+from userpage.jieba1 import jieba
 
-#import jieba
-#import jieba.analyse
-#jieba.enable_parallel(15) # 开启并行分词模式，参数为并行进程数
 jieba.set_dictionary('jieba/extra_dict/dict.txt.small')
 jieba.load_userdict("jieba/userdict.txt") # file_name 为文件类对象或自定义词典的路径
 
@@ -44,24 +38,20 @@ class FoundList(APIView):
 
 #失物招领列表的搜索
 class FoundListSearch(APIView):
-    def divKey(self, contact1):
-        count = 0
+
+    def divKey(self, content):
         inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        contactKeyWord = list(jieba.analyse.extract_tags(contact1, topK=25))
-        for item1 in contactKeyWord:
-            for item2 in inputKeyWord:
-                if item1 == item2:
-                    count += 1
-                    print(item1)
-        return count
+        contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
+        print(contactKeyWord)
+        intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
+        union = list(set(inputKeyWord).union(set(contactKeyWord)))
+        value = len(intersection) / len(union)
+        return value
 
 
     def get(self):
         self.check_input('Content')
-
         items = []
-        guanjianzi = list(jieba.analyse.extract_tags("黑色的钱包", topK=25))
-        print(guanjianzi)
         keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
         print(keys)
         result = {}
@@ -76,11 +66,14 @@ class FoundListSearch(APIView):
             temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
-            if self.divKey(found.description) > 0:
+            content = found.description+found.name
+            temp['divNum'] = self.divKey(content)
+            print(temp['divNum'])
+            if self.divKey(content) > 0:
                 items.append(temp)
                 result['keys'] = keys
                 result['items'] = items
-        items.sort(key=lambda x: x["foundTime"])
+        items.sort(key=lambda x: x["divNum"], reverse=True)
         return result
 
 

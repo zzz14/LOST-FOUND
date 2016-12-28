@@ -68,22 +68,13 @@
 </script>
 
 <script type="text/template" id="tpl-content">
-    {% if status == 0 %}
-    <div class="container" id="detail-processing">
-        <img src="/img/loading.gif">
-        正在载入，请稍候……
-    </div>
-    {% elif status == 1 %}
-    <div class="container" id="detail-processing">
-        <img src="/img/loading.gif">
-        正在执行，请稍候……
-    </div>
-    {% elif status == 2 %}
+
+    {% if status == 2 %}
     <div class="container" id="detail-result">
         <h1>处理结果</h1>
         <pre id="resultHolder">{{ processResult|default('成功') }}</pre>
         <div class="col-sm-offset-2">
-            <a class="btn btn-info" href="{% if processResult.length == 0 %}/a/adminpage/detail?id={{ adminpage.id }}{% else %}javascript:backToForm();{% endif %}">继续修改</a>
+            <a class="btn btn-info" href="javascript:backToForm();">继续发布</a>
             <a class="btn btn-success" href="/a/adminpage/list">返回列表</a>
         </div>
     </div>
@@ -110,7 +101,7 @@
             </div>
 
             <div class="form-group">
-                <label for="input-pic_url" class="col-sm-2 control-label" min="0">物品图片</label>
+                <label for="input-pic_url" class="col-sm-2 control-label" min="0"><img src="/img/picture.png" style="width: 1.4em;"/> &nbsp;物品图片</label>
                 <div class="col-sm-10">
                     <input type="file" name="uploadPic" multiple="multiple" class="btn btn-info" style="width:17%;float:left;" id="fileUploadBtn" onclick="uploadImage();" accept="image/*" />
                 </div>
@@ -300,6 +291,7 @@
                     data.id = parseInt(urlParam.id);
                     updateDate(data, 'publishTime', 'currentTime');
                     locals.adminpage = data;
+
                     render();
                 }, dftFail);
             }
@@ -307,7 +299,7 @@
     });
 
     var backToForm = function () {
-        locals.status = -1;
+        locals.status = 1;
         locals.processResult = '';
         render();
     };
@@ -327,6 +319,8 @@
         }
         data.picUrl = locals.picUrl;
         updateObj(locals.adminpage, data);
+        console.log(locals.adminpage);
+
         if (1) {
             locals.status = 1;
             locals.processResult = '';
