@@ -101,7 +101,7 @@ class LostList(APIView):
 class SchoolOfficeLostList(APIView):
     def get(self):
         items = []
-        if self.input['type'] and self.input['publisherId']:
+        '''if self.input['type'] and self.input['publisherId']:
             for lost in AdminLost.objects.filter(status=0,type=self.input['type'],publisherId=self.input['publisherId']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
@@ -153,7 +153,7 @@ class SchoolOfficeLostList(APIView):
         info['typeList'] = adminLostType
         info['placeList'] = publisherIdToPlaces
         info['items'] = items
-        return info
+        return info'''
 
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
