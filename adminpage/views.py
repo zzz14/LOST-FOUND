@@ -7,7 +7,7 @@ from time import mktime
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
-from wechat.models import AdminLost, publisherIdToPlaces
+from wechat.models import AdminLost, publisherIdToPlaces, adminLostType
 from LostAndFound.settings import CONFIGS
 
 class userLogin(APIView):
@@ -58,7 +58,7 @@ class uploadImage(APIView):
 class adminLostList(APIView):
     def get(self):
         items = []
-        for lost in AdminLost.objects.all():
+        for lost in AdminLost.objects.filter(status=0, publisherId=self.request.user.id):
             temp = {}
             temp['id'] = lost.id
             temp['type'] = lost.type
