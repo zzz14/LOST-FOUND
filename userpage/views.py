@@ -10,8 +10,10 @@ from wechat.wrapper import WeChatLib
 #分词
 #import sys
 #sys.path.append('jieba/')
-from jieba.jieba.analyse.textrank import TextRank
-from jieba import jieba
+from jieba.analyse.textrank import TextRank
+#from jieba.jieba.analyse.textrank import TextRank
+import jieba
+#from jieba import jieba
 
 #import jieba
 #import jieba.analyse
@@ -74,7 +76,7 @@ class FoundListSearch(APIView):
             temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
-            if self.divKey(found.contacts) > 0:
+            if self.divKey(found.description) > 0:
                 items.append(temp)
                 result['keys'] = keys
                 result['items'] = items
@@ -166,9 +168,11 @@ class SchoolOfficeLostList(APIView):
 # 前端须返回输入user
 class MineLost(APIView):
     def get(self):
+        self.check_input('user')
         items = []
-        for lost in Lost.objects.filter(user=self.input['user'], status=0):
+        for lost in Lost.objects.filter(user__open_id=self.input['user'], status=0):
             temp = {}
+            temp['id'] = lost.id
             temp['name'] = lost.name
             temp['contacts'] = lost.contacts
             temp['contactNumber'] = lost.contactNumber
@@ -187,9 +191,11 @@ class MineLost(APIView):
 # 前端须返回输入user
 class MineFound(APIView):
     def get(self):
+        self.check_input('user')
         items = []
-        for found in Found.objects.filter(status=0):
+        for found in Found.objects.filter(user__open_id=self.input['user'],status=0):
             temp = {}
+            temp['id'] = found.id
             temp['name'] = found.name
             temp['contacts'] = found.contacts
             temp['contactNumber'] = found.contactNumber
@@ -215,6 +221,99 @@ class DeleteMineLost(APIView):
 class DeleteMineFound(APIView):
     def get(self):
         Found.objects.filter(id=self.input['id']).update(status=1)
+
+class ModifyLost(APIView):
+    def get(self):
+        self.check_input('user','id')
+        lost = Lost.objects.get(id=self.input['id'],user__open_id=self.input['user'])
+        temp = {}
+        temp['id'] = lost.id
+        temp['itemName'] = lost.name
+        temp['contacts'] = lost.contacts
+        temp['contactNumber'] = lost.contactNumber
+        temp['contactType'] = lost.contactType
+        temp['itemDescription'] = lost.description
+        temp['lostTime'] = mktime(lost.lostTime.timetuple())
+        temp['lostPlace'] = lost.lostPlace
+        temp['picUrl'] = lost.picUrl
+        temp['reward'] = lost.reward
+        return temp
+
+    def post(self):
+        self.check_input('name', 'contacts', 'contactType', 'contactNumber', \
+                         'description', 'lostTime', 'lostPlace', 'reward', 'user', 'id')
+        lost = Lost.objects.get(id=self.input['id'], user__open_id=self.input['user'])
+        lost.name = self.input['name']
+        lost.description = self.input['description']
+        lost.contacts = self.input['contacts']
+        lost.contactNumber = self.input['contactNumber']
+        lost.contactType = self.input['contactType']
+        lost.lostTime = self.input['lostTime']
+        lost.lostPlace = self.input['lostPlace']
+        lost.reward = self.input['reward']
+        if 'media_id' in self.input:
+            getData = {}
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
+            getData['media_id'] = self.input['media_id']
+            data = urllib.parse.urlencode(getData)
+            url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
+            pic = urllib.request.urlopen(url)
+            pic_name = self.input['media_id'] + '.jpg'
+            pic_path = os.path.join('img', 'lost', pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT, pic_path)
+            lost.picUrl = get_url(pic_path)
+            f = open(pic_full_path, 'wb')
+            # TODO
+            f.write(pic.read())
+            f.close()
+        lost.save()
+
+
+class ModifyFound(APIView):
+    def get(self):
+        self.check_input('user', 'id')
+        found = Found.objects.get(id=self.input['id'], user__open_id=self.input['user'])
+        temp = {}
+        temp['id'] = found.id
+        temp['name'] = found.name
+        temp['contacts'] = found.contacts
+        temp['contactNumber'] = found.contactNumber
+        temp['contactType'] = found.contactType
+        temp['description'] = found.description
+        temp['lostTime'] = mktime(found.lostTime.timetuple())
+        temp['lostPlace'] = found.lostPlace
+        temp['picUrl'] = found.picUrl
+        temp['reward'] = found.reward
+        return temp
+
+    def post(self):
+        self.check_input('name', 'contacts', 'contactType', 'contactNumber', \
+                         'description', 'lostTime', 'lostPlace', 'reward', 'user', 'id')
+        found = Found.objects.get(id=self.input['id'], user__open_id=self.input['user'])
+        found.name = self.input['name']
+        found.description = self.input['description']
+        found.contacts = self.input['contacts']
+        found.contactNumber = self.input['contactNumber']
+        found.contactType = self.input['contactType']
+        found.lostTime = self.input['lostTime']
+        found.lostPlace = self.input['lostPlace']
+        found.reward = self.input['reward']
+        if 'media_id' in self.input:
+            getData = {}
+            getData['access_token'] = WeChatLib.get_wechat_access_token()
+            getData['media_id'] = self.input['media_id']
+            data = urllib.parse.urlencode(getData)
+            url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
+            pic = urllib.request.urlopen(url)
+            pic_name = self.input['media_id'] + '.jpg'
+            pic_path = os.path.join('img', 'lost', pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT, pic_path)
+            found.picUrl = get_url(pic_path)
+            f = open(pic_full_path, 'wb')
+            # TODO
+            f.write(pic.read())
+            f.close()
+        found.save()
 
 
 # 拾物详情页

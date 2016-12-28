@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="/css/weui.css" />
+    <script src="/3rd/jquery.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=5F1YoiVMkVZxB0PkegE8vb60Hl0rPIzc"></script>
+    <title>我的发布</title>
+</head>
+<body style="background-color: #f8f8f8">
+<div id="wrap">
+    <div id="navbar"></div>
+    <div id="mainbody"></div>
+</div>
+</body>
+
+<script type="text/template" id="tpl-navbar">
+    <div class="weui-navbar" style="position:fixed">
+        <div class="weui-navbar__item weui-bar__item_on" id="myLost">
+            我的失物
+        </div>
+        <div class="weui-navbar__item" id="myFound">
+            我的拾物
+        </div>
+    </div>
+    <!--用来占位-->
+    <div style="height:50px"></div>
+</script>
+
+
+<script type="text/template" id="tpl-mylost">
+{% for lost in losts %}
+    <!-- item 1 -->
+    <div class="weui-panel" id="lost-{{ lost.id }}">
+        <div class="weui-panel__bd">
+            <a href="" class="weui-media-box weui-media-box_appmsg">
+                <div class="weui-media-box__hd">
+                    <img class="weui-media-box__thumb" src="{% if lost.picUrl %}{{ lost.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
+                </div>
+                <div class="weui-media-box__bd">
+                    <h4 class="weui-media-box__title">{{ lost.name }}</h4>
+                    <p class="weui-media-box__desc">{{ lost.description }}</p>
+                    <ul class="weui-media-box__info">
+                        <li class="weui-media-box__info__meta"><img src="/img/location.png" style="width:9px; vertical-align: middle"> {{ lost.lostPlace }}</li>
+                        {% if lost.showtime %}
+                    <div class="date" style="float:right; width:38%">
+                        <li class="weui-media-box__info__meta">{{ lost.showtime }}</li>
+                    </div>
+                        {% endif %}
+                    </ul>
+                </div>
+            </a>
+        </div>
+        <div class="weui-panel__ft">
+            <div href="" class="weui-cell weui-cell_access weui-cell_link">
+                <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_primary" style="float: right; margin:0" onclick="m_changeLost({{ lost.id }})">修改</a>
+                <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_warn" style="float: right; margin:0 0 0 10px" onclick="m_deleteLost({{ lost.id }})">删除</a>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<!--BEGIN dialog4-->
+        <div class="js_dialog" id="confirmDialog" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog weui-skin_android">
+                <div class="weui-dialog__bd">
+                    您确定要删除这条信息吗？
+                </div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog4-->
+
+<!--BEGIN toast-->
+    <div id="toast_delete" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content">已删除</p>
+        </div>
+    </div>
+    <!--end toast-->
+
+<!--BEGIN toast-->
+    <div id="toast_fail" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content">删除失败</p>
+        </div>
+    </div>
+    <!--end toast-->
+</script>
+
+<script type="text/template" id="tpl-myfound">
+{% for found in founds %}
+    <!-- item 1 -->
+    <div class="weui-panel" id="found-{{ found.id }}">
+        <div class="weui-panel__bd">
+            <a href="" class="weui-media-box weui-media-box_appmsg">
+                <div class="weui-media-box__hd">
+                    <img class="weui-media-box__thumb" src="{% if found.picUrl %}{{ found.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
+                </div>
+                <div class="weui-media-box__bd">
+                    <h4 class="weui-media-box__title">{{ found.name }}</h4>
+                    <p class="weui-media-box__desc">{{ found.description }}</p>
+                    <ul class="weui-media-box__info">
+                        <li class="weui-media-box__info__meta"><img src="/img/location.png" style="width:9px; vertical-align: middle"> {{ found.lostPlace }}</li>
+                        {% if found.showtime %}
+                    <div class="date" style="float:right; width:38%">
+                        <li class="weui-media-box__info__meta">{{ found.showtime }}</li>
+                    </div>
+                        {% endif %}
+                    </ul>
+                </div>
+            </a>
+        </div>
+        <div class="weui-panel__ft">
+            <div href="" class="weui-cell weui-cell_access weui-cell_link">
+                <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_primary" style="float: right; margin:0" onclick="m_changeFound({{ found.id }})">修改</a>
+                <a href="javascript:;" class="weui-btn weui-btn_mini weui-btn_warn" style="float: right; margin:0 0 0 10px" onclick="m_deleteFound({{ found.id }})">删除</a>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<!--BEGIN dialog4-->
+        <div class="js_dialog" id="confirmDialog" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog weui-skin_android">
+                <div class="weui-dialog__bd">
+                    您确定要删除这条信息吗？
+                </div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog4-->
+
+<!--BEGIN toast-->
+    <div id="toast_delete" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content">已删除</p>
+        </div>
+    </div>
+    <!--end toast-->
+
+<!--BEGIN toast-->
+    <div id="toast_fail" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+            <p class="weui-toast__content">删除失败</p>
+        </div>
+    </div>
+    <!--end toast-->
+</script>
+
+<script src="/3rd/jquery.js"></script>
+<script src="/3rd/swig.js"></script>
+<script src="/js/weixin_lib.js"></script>
+<script src="/js/base.js"></script>
+
+<script>
+
+    var locals = {
+
+    };
+
+    var renderNavbar = function () {
+        $('#navbar').html(swig.render($('#tpl-navbar').html(), {}));
+        $('#myLost').on('click', function () {
+            $('#myFound').removeClass('weui-bar__item_on');
+            $('#myLost').addClass('weui-bar__item_on');
+            renderMyLost();
+        });
+
+        $('#myFound').on('click', function () {
+            $('#myLost').removeClass('weui-bar__item_on');
+            $('#myFound').addClass('weui-bar__item_on');
+            renderMyFound();
+        });
+    };
+
+    var renderMyFound = function () {
+        $('#mainbody').html(swig.render($('#tpl-myfound').html(), {locals:locals}));
+    };
+
+    var renderMyLost = function () {
+        $('#mainbody').html(swig.render($('#tpl-mylost').html(), {locals:locals}));
+    };
+
+    var m_changeLost = function (e) {
+        alert(e);
+    };
+
+    var m_changeFound = function (e) {
+        alert(e);
+    };
+
+    var m_deleteLost = function (e) {
+        $("#confirmDialog").fadeIn(100);
+        $("#confirmDialog .weui-dialog .weui-dialog__ft .weui-dialog__btn_default").on('click',function () {
+            $("#confirmDialog").fadeOut(100);
+        });
+        $("#confirmDialog .weui-dialog .weui-dialog__ft .weui-dialog__btn_primary").on('click',function () {
+            $("#confirmDialog").fadeOut(100);
+            api.get('/api/u/mine/lost/delete', {'id':e}, function (data) {
+                if ($("#toast_delete").css('display') != 'none') return;
+
+                $("#toast_delete").fadeIn(100);
+                $("#lost-"+e).remove();
+                setTimeout(function () {
+                    $("#toast_delete").fadeOut(100);
+                }, 1000);
+            },function (errno, errmsg, e) {
+                if ($("#toast_fail").css('display') != 'none') return;
+
+                $("#toast_fail").fadeIn(100);
+                setTimeout(function () {
+                    $("#toast_fail").fadeOut(100);
+                }, 1000);
+            });
+        });
+    };
+
+    var m_deleteFound = function (e) {
+        $("#confirmDialog").fadeIn(100);
+        $("#confirmDialog .weui-dialog .weui-dialog__ft .weui-dialog__btn_default").on('click',function () {
+            $("#confirmDialog").fadeOut(100);
+        });
+        $("#confirmDialog .weui-dialog .weui-dialog__ft .weui-dialog__btn_primary").on('click',function () {
+            api.get('/api/u/mine/found/delete', {'id':e}, function (data) {
+                if ($("#toast_delete").css('display') != 'none') return;
+
+                $("#toast_delete").fadeIn(100);
+                $("#found-"+e).remove();
+                setTimeout(function () {
+                    $("#toast_delete").fadeOut(100);
+                }, 1000);
+            },function (errno, errmsg, e) {
+                if ($("#toast_fail").css('display') != 'none') return;
+
+                $("#toast_fail").fadeIn(100);
+                setTimeout(function () {
+                    $("#toast_fail").fadeOut(100);
+                }, 1000);
+            });
+        });
+    };
+
+    $(function () {
+        swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+        locals.user = urlParam.user;
+        renderNavbar();
+        api.get('/api/u/mine/lost/', {'user':locals.user}, function (data) {
+            swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+            locals.losts = data;
+            for (i=0;i<data.length;i++) {
+                updateDate(locals.losts[i],'lostTime');
+                if( locals.losts[i].lostTime.yyyymmdd() != '1970-01-01')
+                    locals.losts[i].showtime = locals.losts[i].lostTime.yyyymmdd();
+                if(locals.losts[i].lostPlace.length > 10)
+                    locals.losts[i].lostPlace = locals.losts[i].lostPlace.substring(0,9)+"..."
+            }
+            renderMyLost();
+        }, dftFail);
+        api.get('/api/u/mine/found',{'user':locals.user},function (data) {
+            swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+            locals.founds = data;
+            for (i=0;i<data.length;i++) {
+                updateDate(locals.founds[i],'lostTime');
+                if( locals.founds[i].lostTime.yyyymmdd() != '1970-01-01')
+                    locals.founds[i].showtime = locals.founds[i].lostTime.yyyymmdd();
+                if(locals.founds[i].lostPlace.length > 10)
+                    locals.founds[i].lostPlace = locals.founds[i].lostPlace.substring(0,9)+"..."
+            }
+        }, dftFail);
+    });
+</script>
+</html>
