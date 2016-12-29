@@ -4,40 +4,63 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="/css/weui.css"/>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=5F1YoiVMkVZxB0PkegE8vb60Hl0rPIzc"></script>
-    <title>拾物列表</title>
+    <title>失物列表</title>
 </head>
 <body>
 <div id="wrap">
+    <div id="searchbar"></div>
     <div id="mainbody"></div>
+    <div id="map"></div>
 </div>
+
+<script type="text/template" id="tpl-searchbar">
+
+<div class="weui-search-bar" id="searchBar">
+    <form class="weui-search-bar__form">
+        <div class="weui-search-bar__box">
+            <i class="weui-icon-search"></i>
+            <input class="weui-search-bar__input" type="search" id="searchInput" placeholder="搜索" required />
+            <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
+        </div>
+        <label class="weui-search-bar__label" id="searchText">
+            <i class="weui-icon-search"></i>
+            <span>搜索</span>
+        </label>
+    </form>
+    <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
+    <a href="javascript:" class="weui-search-bar_focusing" id="createLost"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
+    <a href="javascript:" class="weui-search-bar_focusing" id="searchByPlace"><img src="/img/location.png" style="padding-left: 0.4em; vertical-align:middle; width:1em "></a>
+</div>
+</script>
 
 <script type="text/template" id="tpl-mainbody">
 
-<a onclick="m_createLost()">新建失物</a>
-<!-- TODO -->
-
-{% if items %}
+{% if locals.items %}
 <div class="weui-panel__bd">
     <!-- item -->
     {% for item in items %}
-    <a href="" class="weui-media-box weui-media-box_appmsg">
-        <div class="weui-media-box__hd">
-            <img class="weui-media-box__thumb" src="{{ item.picUrl }}" alt>
+
+
+        <div class="weui-media-box weui-media-box_appmsg item" id="item-{{ item.id }}">
+            <div class="weui-media-box__hd">
+                <img class="weui-media-box__thumb" src="{% if item.picUrl %}{{ item.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
+            </div>
+            <div class="weui-media-box__bd">
+                <h4 class="weui-media-box__title">{{ item.name }}</h4>
+                <p class="weui-media-box__desc">{{ item.description }}</p>
+                <ul class="weui-media-box__info">
+                    <li class="weui-media-box__info__meta" ><img src="/img/location2.png"> {{ item.lostPlace }}</li>
+                    {% if item.showtime %}
+                    <div class="date" style="float:right; width:38%">
+                        <li class="weui-media-box__info__meta">{{ item.showtime }}</li>
+                    </div>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-        <div class="weui-media-box__bd">
-            <h4 class="weui-media-box__title">{{ item.name }}</h4>
-            <p class="weui-media-box__desc">{{ item.description }}</p>
-            <ul class="weui-media-box__info">
-                <li class="weui-media-box__info__meta">{{ item.lostPlace }} <img src="location.png"></li>
-                <li class="weui-media-box__info__meta">{{ item.lostTime }}</li>
-            </ul>
-        </div>
-    </a>
+
     {% endfor %}
 </div>
-{% else %}
-没有拾物
 {% endif %}
 </script>
 
@@ -45,30 +68,164 @@
 <script src="/3rd/swig.js"></script>
 <script src="/js/weixin_lib.js"></script>
 <script src="/js/base.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=5F1YoiVMkVZxB0PkegE8vb60Hl0rPIzc"></script>
+
 
 <script>
     var locals = {};
-    var render = function () {
-        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+    var renderSearchbar = function () {
+        $('#searchbar').html(swig.render($('#tpl-searchbar').html(), {}));
+        $('#searchText').on('click', function(){
+            $('#searchBar').addClass('weui-search-bar_focusing');
+            $('#searchInput').focus();
+            $('#createLost').hide();
+            $('#searchByPlace').hide();
+        });
+        $('#searchInput')
+                .on('blur', function () {
+                    if(!this.value.length) cancelSearch();
+                })
+                .on('keypress', function(e) {
+                    if (e.which == 13) {
+                        data = {
+                            'Content': $(this).val(),
+                        };
+                        api.get('/api/u/lost/list_search',data,function (data) {
+                            swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+                            locals.items = data;
+                            for (i=0;i<data.length;i++) {
+                                updateDate(locals.items[i],'lostTime');
+                                if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
+                                    locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
+                                if(locals.items[i].lostPlace.length > 10)
+                                    locals.items[i].lostPlace = locals.items[i].lostPlace.substring(0,9)+"..."
+                            }
+                            renderMainbody();
+                        }, dftFail);
+                    }
+                });
+        $('#searchClear')
+                .on('click', function(){
+                    $('#searchInput').val('');
+                    $('#searchInput').focus();
+                })
+                ;
+        $('#searchCancel').on('click', function(){
+            cancelSearch();
+            $('#searchInput').blur();
+        });
+        $('#createLost').on('click', function () {
+            window.location.href = "/u/found/new?user="+locals.user;
+        });
+
+        $('#searchByPlace').on('click',function () {
+
+        });
+
+        function cancelSearch(){
+            $('#searchBar').removeClass('weui-search-bar_focusing');
+            $('#searchText').show();
+            $('#createLost').show();
+            $('#searchByPlace').show();
+        }
     };
+    var renderMainbody = function () {
+        $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
+        $('.item').click( function () {
+            var strs = $(this).attr("id").split('-');
+            if(strs.length == 2){
+                window.location.href = "/u/lost/detail?id="+strs[1];
+            }
+        });
+    };
+
+    var renderMap = function () {
+        $('#mainbody').html("");
+        $('#map').html(swig.render($('#tpl-map').html(), {locals: locals}));
+        maps.map = new BMap.Map("l-map");
+        maps.ac = new BMap.Autocomplete({
+                "input" : "suggestId",
+                "location" : maps.map
+            });
+      //  maps.map.centerAndZoom("清华大学",18);                   // 初始化地图,设置城市和地图级别。
+
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function(r){
+            if(this.getStatus() == BMAP_STATUS_SUCCESS){
+                maps.marker = new BMap.Marker(r.point);
+                maps.marker.enableDragging();
+                maps.marker.addEventListener('dragend',function () {
+                    var pt = maps.marker.getPosition();
+                    var geoc = new BMap.Geocoder();
+                    geoc.getLocation(pt,function (rs) {
+                        var pois = rs.surroundingPois;
+                        $("#suggestId").val(pois[1].title);
+                    });
+                });
+                maps.map.addOverlay(maps.marker);
+                maps.map.centerAndZoom(r.point,18);
+            }
+            else {
+                alert('failed'+this.getStatus());
+            }
+        },{enableHighAccuracy: true});
+
+        maps.ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
+            var str = "";
+            var _value = e.fromitem.value;
+            var value = "";
+            if (e.fromitem.index > -1) {
+                value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+            }
+            str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+
+            value = "";
+            if (e.toitem.index > -1) {
+                _value = e.toitem.value;
+                value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+            }
+            str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+            G("searchResultPanel").innerHTML = str;
+        });
+
+        maps.ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+            var _value = e.item.value;
+            var myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+            G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+            setPlace(myValue);
+        });
+
+        $("#map-ok").click(function () {
+            if(maps.marker && $("suggestId").val() != "") {
+                var p = maps.marker.getPosition();
+                locals.lng = p.lng;
+                locals.lat = p.lat;
+                locals.lostPlace = $("#suggestId").val();
+            }
+           // alert(locals.image.localId);
+            render();
+            maps = {};
+        });
+    }
+
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
         locals.user = urlParam.user;
+        renderSearchbar();
         api.get('/api/u/lost/list', {}, function (data) {
+            swig.setDefaultTZOffset(new Date().getTimezoneOffset());
             locals.items = data;
-            render();
+            for (i=0;i<data.length;i++) {
+                updateDate(locals.items[i],'lostTime');
+                if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
+                    locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
+                if(locals.items[i].lostPlace.length > 10)
+                    locals.items[i].lostPlace = locals.items[i].lostPlace.substring(0,9)+"..."
+            }
+            renderMainbody();
         }, dftFail);
     });
-    $(".item").click(function () {
-        var strs = this.attr("id").split('-');
-        if(strs.length == 2){
-            window.location.href = "/u/lost/detail?id="+strs[1];
-        }
-    })
 
-    var m_createLost = function () {
-        window.location.href = "/u/lost/new?user="+locals.user;
-    }
 
 </script>
 </body>

@@ -35,7 +35,7 @@
     <!-- item 1 -->
     <div class="weui-panel" id="lost-{{ lost.id }}">
         <div class="weui-panel__bd">
-            <a href="" class="weui-media-box weui-media-box_appmsg">
+            <a href="javascript:;" class="weui-media-box weui-media-box_appmsg">
                 <div class="weui-media-box__hd">
                     <img class="weui-media-box__thumb" src="{% if lost.picUrl %}{{ lost.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
                 </div>
@@ -103,7 +103,7 @@
     <!-- item 1 -->
     <div class="weui-panel" id="found-{{ found.id }}">
         <div class="weui-panel__bd">
-            <a href="" class="weui-media-box weui-media-box_appmsg">
+            <a href="javascript:;" class="weui-media-box weui-media-box_appmsg">
                 <div class="weui-media-box__hd">
                     <img class="weui-media-box__thumb" src="{% if found.picUrl %}{{ found.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
                 </div>
@@ -111,7 +111,7 @@
                     <h4 class="weui-media-box__title">{{ found.name }}</h4>
                     <p class="weui-media-box__desc">{{ found.description }}</p>
                     <ul class="weui-media-box__info">
-                        <li class="weui-media-box__info__meta"><img src="/img/location.png" style="width:9px; vertical-align: middle"> {{ found.lostPlace }}</li>
+                        <li class="weui-media-box__info__meta"><img src="/img/location.png" style="width:9px; vertical-align: middle"> {{ found.foundPlace }}</li>
                         {% if found.showtime %}
                     <div class="date" style="float:right; width:38%">
                         <li class="weui-media-box__info__meta">{{ found.showtime }}</li>
@@ -201,11 +201,11 @@
     };
 
     var m_changeLost = function (e) {
-        alert(e);
+        window.location.href = "/u/lost/modify?user="+locals.user+"&id="+e;
     };
 
     var m_changeFound = function (e) {
-        alert(e);
+        window.location.href = "/u/found/modify?user="+locals.user+"&id="+e;
     };
 
     var m_deleteLost = function (e) {
@@ -220,6 +220,7 @@
 
                 $("#toast_delete").fadeIn(100);
                 $("#lost-"+e).remove();
+                delete locals.losts[e];
                 setTimeout(function () {
                     $("#toast_delete").fadeOut(100);
                 }, 1000);
@@ -240,11 +241,13 @@
             $("#confirmDialog").fadeOut(100);
         });
         $("#confirmDialog .weui-dialog .weui-dialog__ft .weui-dialog__btn_primary").on('click',function () {
+            $("#confirmDialog").fadeOut(100);
             api.get('/api/u/mine/found/delete', {'id':e}, function (data) {
                 if ($("#toast_delete").css('display') != 'none') return;
 
                 $("#toast_delete").fadeIn(100);
                 $("#found-"+e).remove();
+                delete locals.founds[e];
                 setTimeout(function () {
                     $("#toast_delete").fadeOut(100);
                 }, 1000);
@@ -279,11 +282,11 @@
             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
             locals.founds = data;
             for (i=0;i<data.length;i++) {
-                updateDate(locals.founds[i],'lostTime');
-                if( locals.founds[i].lostTime.yyyymmdd() != '1970-01-01')
-                    locals.founds[i].showtime = locals.founds[i].lostTime.yyyymmdd();
-                if(locals.founds[i].lostPlace.length > 10)
-                    locals.founds[i].lostPlace = locals.founds[i].lostPlace.substring(0,9)+"..."
+                updateDate(locals.founds[i],'foundTime');
+                if( locals.founds[i].foundTime.yyyymmdd() != '1970-01-01')
+                    locals.founds[i].showtime = locals.founds[i].foundTime.yyyymmdd();
+                if(locals.founds[i].foundPlace.length > 10)
+                    locals.founds[i].foundPlace = locals.founds[i].foundPlace.substring(0,9)+"..."
             }
         }, dftFail);
     });

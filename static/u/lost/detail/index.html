@@ -3,74 +3,63 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="/css/base.css" rel="stylesheet" type="text/css" />
-    <link href="/css/ticket.css" rel="stylesheet" type="text/css" />
-    <title>我的电子票 - 紫荆之声</title>
+    <link rel="stylesheet" href="/css/weui.css"/>
+    <title>失物详情</title>
 </head>
 <body>
 <div id="wrap">
-    <header></header>
-
-    <div class="theme" id="theme"></div>
-
-    <hr/>
     <div id="mainbody"></div>
-
 </div>
-<footer id="footer">
-    <hr />
-    <a href="http://www.xuetangx.com/" target="_blank">学堂在线</a>
-    <a href="http://www.tsinghua.edu.cn/" target="_blank">清华大学</a>
-    <a href="https://github.com/ThssSE" target="_blank">软件工程</a><br>
-    &copy; 2016
-</footer>
 
-<script type="text/template" id="tpl-header">
-    <img class="header-img" src="/img/logo.jpg" />
-</script>
-
-<script type="text/template" id="tpl-theme">
-    {% if ticket %}
-        “{{ ticket.activityName }}”电子票
-    {% else %}
-        正在载入……
-    {% endif %}
-</script>
 
 <script type="text/template" id="tpl-mainbody">
-{% if found %}
-    <div id="item-detail">
-    <image href="{{ found.picUrl }}"/>
-    <p>失物名称：{{ found.name }}</p>
-    <br />
-    <p>失物描述：{{ found.description }}</p>
-    <br />
-    <p>联系方式：{{ found.contact }}</p>
-    <br />
-    <p>丢失地点：{{ found.lostPlace }}</p>
+{% if lost %}
+
+    <div class="weui-flex">
+        <div class="weui-flex__item" style="background-color: #f9f9f9">
+            <img src="{{ lost.picUrl }}" style="width: 90%; padding: 10px 0px; display: block; margin-left: auto; margin-right: auto; border-radius: 5%">
+        </div>
+    </div>
+    <div class="weui-flex">
+        <div class="weui-media-box weui-media-box_text">
+            <h4 class="weui-media-box__title">{{ lost.name }}</h4>
+            <p style="color: #777777; font-size: 13px; line-height: 1.5;">{{ lost.description }}</p>
+            <ul class="weui-media-box__info">
+                <li class="weui-media-box__info__meta"><img src="/img/location2.png" style="margin-right:5px; vertical-align:middle">{{ lost.lostPlace }}</li>
+                {% if lost.showtime %}
+                <li class="weui-media-box__info__meta" style="float:right">{{ lost.showtime }}</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <div class="weui-flex">
+        <div class="weui-flex__item" style="background-color: #f9f9f9">
+            <div class="weui-media-box weui-media-box_text">
+                <p style="font-size: 14px; line-height: 1.5; line-height: 2">联系人：{{ lost.contacts }}</p>
+                <p style="font-size: 14px; line-height: 1.5; line-height: 2">{{ lost.contactType }}：{{ lost.contactNumber }}</p>
+            </div>
+        </div>
     </div>
 {% endif %}
 </script>
 
 <script src="/3rd/jquery.js"></script>
 <script src="/3rd/swig.js"></script>
-<script src="/3rd/qrcode.js"></script>
 <script src="/js/weixin_lib.js"></script>
 <script src="/js/base.js"></script>
-<script src="/js/ticket.js"></script>
-
 
 <script>
     var locals = {};
     var render = function () {
-        $('header').html(swig.render($('#tpl-header').html(), {locals: locals}));
-        $('#theme').html(swig.render($('#tpl-theme').html(), {locals: locals}));
         $('#mainbody').html(swig.render($('#tpl-mainbody').html(), {locals: locals}));
     };
     $(function () {
         render();
         api.get('/api/u/lost/detail', {id: urlParam.id}, function (data) {
-            locals.found = data;
+            locals.lost = data;
+            updateDate(locals.lost,'lostTime');
+            if( locals.lost.lostTime.yyyymmdd() != '1970-01-01')
+                    locals.lost.showtime = locals.lost.lostTime.yyyymmdd();
             render();
         }, dftFail);
     });

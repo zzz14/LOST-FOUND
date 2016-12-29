@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="/css/weui.css"/>
-    <title>失物详情</title>
+    <title>拾物详情</title>
 </head>
 <body>
 <div id="wrap">
@@ -13,21 +13,21 @@
 
 
 <script type="text/template" id="tpl-mainbody">
-{% if lost %}
+{% if found %}
 
     <div class="weui-flex">
         <div class="weui-flex__item" style="background-color: #f9f9f9">
-            <img src="{{ lost.picUrl }}" style="width: 90%; padding: 10px 0px; display: block; margin-left: auto; margin-right: auto; border-radius: 5%">
+            <img src="{{ found.picUrl }}" style="width: 90%; padding: 10px 0px; display: block; margin-left: auto; margin-right: auto; border-radius: 5%">
         </div>
     </div>
     <div class="weui-flex">
         <div class="weui-media-box weui-media-box_text">
-            <h4 class="weui-media-box__title">{{ lost.name }}</h4>
-            <p style="color: #777777; font-size: 13px; line-height: 1.5;">{{ lost.description }}</p>
+            <h4 class="weui-media-box__title">{{ found.name }}</h4>
+            <p style="color: #777777; font-size: 13px; line-height: 1.5;">{{ found.description }}</p>
             <ul class="weui-media-box__info">
-                <li class="weui-media-box__info__meta"><img src="/img/location2.png" style="margin-right:5px; vertical-align:middle">{{ lost.lostPlace }}</li>
-                {% if lost.showtime %}
-                <li class="weui-media-box__info__meta" style="float:right">{{ lost.showtime }}</li>
+                <li class="weui-media-box__info__meta"><img src="/img/location2.png" style="margin-right:5px; vertical-align:middle">{{ found.foundPlace }}</li>
+                {% if found.showtime %}
+                <li class="weui-media-box__info__meta" style="float:right">{{ found.showtime }}</li>
                 {% endif %}
             </ul>
         </div>
@@ -35,8 +35,8 @@
     <div class="weui-flex">
         <div class="weui-flex__item" style="background-color: #f9f9f9">
             <div class="weui-media-box weui-media-box_text">
-                <p style="font-size: 14px; line-height: 1.5; line-height: 2">联系人：{{ lost.contacts }}</p>
-                <p style="font-size: 14px; line-height: 1.5; line-height: 2">{{ lost.contactType }}：{{ lost.contactNumber }}</p>
+                <p style="font-size: 14px; line-height: 1.5; line-height: 2">联系人：{{ found.contacts }}</p>
+                <p style="font-size: 14px; line-height: 1.5; line-height: 2">{{ found.contactType }}：{{ found.contactNumber }}</p>
             </div>
         </div>
     </div>
@@ -56,10 +56,12 @@
     $(function () {
         render();
         api.get('/api/u/found/detail', {id: urlParam.id}, function (data) {
-            locals.lost = data;
-            updateDate(locals.lost,'lostTime');
-            if( locals.lost.lostTime.yyyymmdd() != '1970-01-01')
-                    locals.lost.showtime = locals.lost.lostTime.yyyymmdd();
+            locals.found = data;
+            updateDate(locals.found,'foundTime');
+            if( locals.found.foundTime.yyyymmdd() != '1970-01-01')
+                    locals.found.showtime = locals.found.foundTime.yyyymmdd();
+            if( locals.found.foundPlace == "")
+                    locals.found.foundPlace = "不详";
             render();
         }, dftFail);
     });

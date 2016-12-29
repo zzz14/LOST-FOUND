@@ -75,7 +75,7 @@
                 <div class="weui-cell__hd"><label class="weui-label">丢失地点</label></div>
                 <div class="weui-cell__bd">
                     <p class="form-new-lost-input" id="lostPlace" name="lostPlace" onclick="m_setPlace()" style="margin-bottom: 0px">
-                        {% if locals.lostPlace %}
+                        {% if locals.lostPlace.length > 0 %}
                             {% for p in locals.lostPlace %}
                             {{ p }},
                             {% endfor %}
@@ -131,8 +131,7 @@
                 您的失物正向您飞奔而来哟，相信它很快就会回到主人的怀中哒~~
             </div>
             <div class="weui-dialog__ft">
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" onclick="m_modify()">继续修改</a>
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" onclick="m_backToIndex()">返回列表</a>
+                <a href="/u/mine?user={{ locals.user }}&choose=lost" class="weui-dialog__btn weui-dialog__btn_primary">查看失物</a>
             </div>
         </div>
     </div>
@@ -147,8 +146,8 @@
                 抱歉，您暂时不能发布失物，我们会尽快修好故障，让失物尽早回家~~~
             </div>
             <div class="weui-dialog__ft">
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" onclick="m_modify()">继续修改</a>
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" onclick="m_backToIndex()">返回列表</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">继续修改</a>
+                <a href="/u/found/list?user={{ locals.user }}" class="weui-dialog__btn weui-dialog__btn_primary">返回列表</a>
             </div>
         </div>
     </div>
@@ -472,9 +471,13 @@
                 && item['contactNumber']) {
             api.post('/api/u/lost/new',item,function (data) {
                 $("#succDialog").fadeIn(100);
+
             }, function (errno, errmsg, e) {
                 $("#failDialog .weui-dialog .weui-dialog__bd").innerHTML="["+errno+"]:"+errmsg;
                 $("#failDialog").fadeIn(100);
+                $("#failDialog .weui-dialog .weui-dialog__ft .weui-dialog__btn_default").on('click',function () {
+                    $("#failDialog").fadeOut(100);
+                });
             });
         }
     }

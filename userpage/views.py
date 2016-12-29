@@ -25,15 +25,28 @@ class FoundList(APIView):
             temp = {}
             temp['id'] = found.id
             temp['name'] = found.name
-            temp['contacts'] = found.contacts
-            temp['contactNumber'] = found.contactNumber
-            temp['contactType'] = found.contactType
             temp['description'] = found.description
             temp['foundTime'] = mktime(found.foundTime.timetuple())
             temp['foundPlace'] = found.foundPlace
             temp['picUrl'] = found.picUrl
             items.append(temp)
         items.sort(key=lambda x: x["foundTime"])
+        return items
+
+# 点击“捡了东西”后出现的列表（丢失物品的列表）
+class LostList(APIView):
+    def get(self):
+        items = []
+        for lost in Lost.objects.filter(status=0):
+            temp = {}
+            temp['id'] = lost.id
+            temp['name'] = lost.name
+            temp['description'] = lost.description
+            temp['lostTime'] = mktime(lost.lostTime.timetuple())
+            temp['lostPlace'] = lost.lostPlace
+            temp['picUrl'] = lost.picUrl
+            items.append(temp)
+        items.sort(key=lambda x: x["lostTime"])
         return items
 
 #失物招领列表的搜索
@@ -76,26 +89,6 @@ class FoundListSearch(APIView):
         items.sort(key=lambda x: x["divNum"], reverse=True)
         return result
 
-
-# 点击“捡了东西”后出现的列表（丢失物品的列表）
-class LostList(APIView):
-    def get(self):
-        items = []
-        for lost in Lost.objects.filter(status=0):
-            temp = {}
-            temp['id'] = lost.id
-            temp['name'] = lost.name
-            temp['description'] = lost.description
-            temp['lostTime'] = mktime(lost.lostTime.timetuple())
-            temp['lostPlace'] = lost.lostPlace
-            temp['picUrl'] = lost.picUrl
-            if lost.latitude != 0:
-                temp['lat'] = lost.latitude
-            if lost.longitude != 0:
-                temp['lng'] = lost.longitude
-            items.append(temp)
-        items.sort(key=lambda x: x["lostTime"])
-        return items
 
 # 失物招领列表的搜索
 class LostListSearch(APIView):
@@ -281,8 +274,8 @@ class ModifyLost(APIView):
         temp['itemDescription'] = lost.description
         temp['lostTime'] = mktime(lost.lostTime.timetuple())
         temp['lostPlace'] = lost.lostPlace
-        temp['picUrl'] = lost.picUrl
         temp['reward'] = lost.reward
+
         return temp
 
     def post(self):
@@ -304,9 +297,9 @@ class ModifyLost(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            pic_name = self.input['media_id'] + '.jpg'
-            pic_path = os.path.join('img', 'lost', pic_name)
-            pic_full_path = os.path.join(STATIC_ROOT, pic_path)
+            pic_name = self.input['media_id']+'.jpg'
+            pic_path = os.path.join('img','lost',pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT,pic_path)
             lost.picUrl = get_url(pic_path)
             f = open(pic_full_path, 'wb')
             # TODO
@@ -321,29 +314,26 @@ class ModifyFound(APIView):
         found = Found.objects.get(id=self.input['id'], user__open_id=self.input['user'])
         temp = {}
         temp['id'] = found.id
-        temp['name'] = found.name
+        temp['itemName'] = found.name
         temp['contacts'] = found.contacts
         temp['contactNumber'] = found.contactNumber
         temp['contactType'] = found.contactType
-        temp['description'] = found.description
-        temp['lostTime'] = mktime(found.lostTime.timetuple())
-        temp['lostPlace'] = found.lostPlace
-        temp['picUrl'] = found.picUrl
-        temp['reward'] = found.reward
+        temp['itemDescription'] = found.description
+        temp['lostTime'] = mktime(found.foundTime.timetuple())
+        temp['lostPlace'] = found.foundPlace
         return temp
 
     def post(self):
         self.check_input('name', 'contacts', 'contactType', 'contactNumber', \
-                         'description', 'lostTime', 'lostPlace', 'reward', 'user', 'id')
+                         'description', 'foundTime', 'foundPlace', 'user', 'id')
         found = Found.objects.get(id=self.input['id'], user__open_id=self.input['user'])
         found.name = self.input['name']
         found.description = self.input['description']
         found.contacts = self.input['contacts']
         found.contactNumber = self.input['contactNumber']
         found.contactType = self.input['contactType']
-        found.lostTime = self.input['lostTime']
-        found.lostPlace = self.input['lostPlace']
-        found.reward = self.input['reward']
+        found.foundTime = self.input['foundTime']
+        found.foundPlace = self.input['foundPlace']
         if 'media_id' in self.input:
             getData = {}
             getData['access_token'] = WeChatLib.get_wechat_access_token()
@@ -351,9 +341,9 @@ class ModifyFound(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            pic_name = self.input['media_id'] + '.jpg'
-            pic_path = os.path.join('img', 'lost', pic_name)
-            pic_full_path = os.path.join(STATIC_ROOT, pic_path)
+            pic_name = self.input['media_id']+'.jpg'
+            pic_path = os.path.join('img','found',pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT,pic_path)
             found.picUrl = get_url(pic_path)
             f = open(pic_full_path, 'wb')
             # TODO
@@ -366,15 +356,16 @@ class ModifyFound(APIView):
 # 需提供拾物的id
 class FoundDetail(APIView):
     def get(self):
-        found = Found.objects.get(id=self.input('id'))
+        self.check_input('id')
+        found = Found.objects.get(id=self.input['id'])
         temp = {}
         temp['name'] = found.name
-        temp['contact'] = found.contact
+        temp['contacts'] = found.contacts
         temp['contactType'] = found.contactType
         temp['contactNumber'] = found.contactNumber
         temp['description'] = found.description
-        temp['lostTime'] = mktime(found.foundTime.timetuple())
-        temp['lostPlace'] = found.foundPlace
+        temp['foundTime'] = mktime(found.foundTime.timetuple())
+        temp['foundPlace'] = found.foundPlace
         temp['picUrl'] = found.picUrl
         return temp
 
@@ -449,11 +440,13 @@ class NewLost(APIView):
             f.write(pic.read())
             f.close()
         lost.save()
+        return {'id':lost.id}
 
 # 新建拾物信息的界面
 class NewFound(APIView):
     def post(self):
-        self.check_input('name', 'contacts', 'contactType', 'contactNumber', 'description', 'foundTime', 'foundPlace', 'reward')
+        self.check_input('name', 'contacts', 'contactType', 'contactNumber', 'description', 'foundTime', 'foundPlace')
+        user = User.get_by_openid(self.input['user'])
         found = Found(name=self.input['name'],
                       description=self.input['description'],
                       contacts=self.input['contacts'],
@@ -461,7 +454,7 @@ class NewFound(APIView):
                       contactType=self.input['contactType'],
                       foundTime=self.input['foundTime'],
                       foundPlace=self.input['foundPlace'],
-                      user=self.user.open_id,
+                      user=user,
                       status=0)
         if 'lng' in self.input:
             found.longitude = self.input['lng']
@@ -474,11 +467,16 @@ class NewFound(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            f = open(self.input['media_id'] + ".jpg", 'wb')
+            pic_name = self.input['media_id'] + '.jpg'
+            pic_path = os.path.join('img', 'found', pic_name)
+            pic_full_path = os.path.join(STATIC_ROOT, pic_path)
+            found.picUrl = get_url(pic_path)
+            f = open(pic_full_path, 'wb')
+            # TODO
             f.write(pic.read())
             f.close()
-            found.picUrl = settings.STATIC_ROOT + '/img/lostAndFound/found/' + str(self.input['media_id'])
         found.save()
+        return {'id':found.id}
 
 class WxConfig(APIView):
     def get(self):

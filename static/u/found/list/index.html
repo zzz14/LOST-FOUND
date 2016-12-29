@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="/css/weui.css"/>
-    <title>失物列表</title>
+    <title>拾物列表</title>
 </head>
 <body>
 <div id="wrap">
@@ -28,7 +28,7 @@
         </label>
     </form>
     <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
-    <a href="javascript:" class="weui-search-bar_focusing" id="createLost"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
+    <a href="javascript:" class="weui-search-bar_focusing" id="createFound"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
     <a href="javascript:" class="weui-search-bar_focusing" id="searchByPlace"><img src="/img/location.png" style="padding-left: 0.4em; vertical-align:middle; width:1em "></a>
 </div>
 </script>
@@ -49,7 +49,7 @@
                 <h4 class="weui-media-box__title">{{ item.name }}</h4>
                 <p class="weui-media-box__desc">{{ item.description }}</p>
                 <ul class="weui-media-box__info">
-                    <li class="weui-media-box__info__meta" ><img src="/img/location2.png"> {{ item.lostPlace }}</li>
+                    <li class="weui-media-box__info__meta" ><img src="/img/location2.png"> {{ item.foundPlace }}</li>
                     {% if item.showtime %}
                     <div class="date" style="float:right; width:38%">
                         <li class="weui-media-box__info__meta">{{ item.showtime }}</li>
@@ -78,7 +78,7 @@
         $('#searchText').on('click', function(){
             $('#searchBar').addClass('weui-search-bar_focusing');
             $('#searchInput').focus();
-            $('#createLost').hide();
+            $('#createFound').hide();
             $('#searchByPlace').hide();
         });
         $('#searchInput')
@@ -94,11 +94,11 @@
                             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
                             locals.items = data;
                             for (i=0;i<data.length;i++) {
-                                updateDate(locals.items[i],'lostTime');
-                                if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
-                                    locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
-                                if(locals.items[i].lostPlace.length > 10)
-                                    locals.items[i].lostPlace = locals.items[i].lostPlace.substring(0,9)+"..."
+                                updateDate(locals.items[i],'foundTime');
+                                if( locals.items[i].foundTime.yyyymmdd() != '1970-01-01')
+                                    locals.items[i].showtime = locals.items[i].foundTime.yyyymmdd();
+                                if(locals.items[i].foundPlace.length > 10)
+                                    locals.items[i].foundPlace = locals.items[i].foundPlace.substring(0,9)+"..."
                             }
                             renderMainbody();
                         }, dftFail);
@@ -114,7 +114,7 @@
             cancelSearch();
             $('#searchInput').blur();
         });
-        $('#createLost').on('click', function () {
+        $('#createFound').on('click', function () {
             window.location.href = "/u/lost/new?user="+locals.user;
         });
 
@@ -125,7 +125,7 @@
         function cancelSearch(){
             $('#searchBar').removeClass('weui-search-bar_focusing');
             $('#searchText').show();
-            $('#createLost').show();
+            $('#createFound').show();
             $('#searchByPlace').show();
         }
     };
@@ -200,7 +200,7 @@
                 var p = maps.marker.getPosition();
                 locals.lng = p.lng;
                 locals.lat = p.lat;
-                locals.lostPlace = $("#suggestId").val();
+                locals.foundPlace = $("#suggestId").val();
             }
            // alert(locals.image.localId);
             render();
@@ -216,11 +216,11 @@
             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
             locals.items = data;
             for (i=0;i<data.length;i++) {
-                updateDate(locals.items[i],'lostTime');
-                if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
-                    locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
-                if(locals.items[i].lostPlace.length > 10)
-                    locals.items[i].lostPlace = locals.items[i].lostPlace.substring(0,9)+"..."
+                updateDate(locals.items[i],'foundTime');
+                if( locals.items[i].foundTime.yyyymmdd() != '1970-01-01')
+                    locals.items[i].showtime = locals.items[i].foundTime.yyyymmdd();
+                if(locals.items[i].foundPlace.length > 10)
+                    locals.items[i].foundPlace = locals.items[i].foundPlace.substring(0,9)+"..."
             }
             renderMainbody();
         }, dftFail);

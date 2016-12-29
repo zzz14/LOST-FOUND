@@ -93,16 +93,12 @@
             </div>
         </div>
 
-        <!-- 图片上传 -->
+    <!-- 图片上传 -->
         <div class="weui-cells__title">失物图片</div>
         <div class="weui-cells">
             {% if locals.image.localId %}
             <ul class="weui_uploader_files js_previews" id="uploaderFiles">
                 <li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url({{ locals.image.localId }})"></li>
-            </ul>
-            {% elif locals.picUrl %}
-                <ul class="weui_uploader_files js_previews" id="uploaderFiles">
-                <li class="weui-uploader__file" onclick = "m_previewImage()" style="background-image: url({{ locals.picUrl }})"></li>
             </ul>
             {% else %}
             <div class="weui-uploader__input-box" style="margin-bottom: 4px; margin-top: 4px; margin-left: auto; margin-right: auto; float: none">
@@ -114,7 +110,6 @@
         <div class="weui-btn-area">
             <a class="weui-btn weui-btn_primary" href="javascript:" onclick="m_submit()">确定</a>
         </div>
-    </form>
 
     <div class="weui-gallery" id="galleryImg-div">
         <span class="weui-gallery__img" id="galleryImg" onclick="m_backFromPreview()"></span>
@@ -124,6 +119,7 @@
             </a>
         </div>
     </div>
+    </form>
 
  <!--BEGIN dialog3-->
     <div class="js_dialog" id="succDialog" style="display: none;">
@@ -135,8 +131,7 @@
                 您的失物正向您飞奔而来哟，相信它很快就会回到主人的怀中哒~~
             </div>
             <div class="weui-dialog__ft">
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" onclick="m_modify()">继续修改</a>
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" onclick="m_backToIndex()">返回列表</a>
+                <a href="/u/mine?user={{ locals.user }}&choose=lost" class="weui-dialog__btn weui-dialog__btn_primary">返回列表</a>
             </div>
         </div>
     </div>
@@ -151,8 +146,8 @@
                 抱歉，您暂时不能发布失物，我们会尽快修好故障，让失物尽早回家~~~
             </div>
             <div class="weui-dialog__ft">
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default" onclick="m_modify()">继续修改</a>
-                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" onclick="m_backToIndex()">返回列表</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">继续修改</a>
+                <a href="/u/mine?user={{ locals.user }}&choose=lost" class="weui-dialog__btn weui-dialog__btn_primary">返回列表</a>
             </div>
         </div>
     </div>
@@ -361,10 +356,7 @@
             });
         }, dftFail);
     });
-
-
-
-    var m_chooseImage = function () {
+var m_chooseImage = function () {
         wx.chooseImage({
             count: 1,
             sizeType: ['compressed'],
@@ -410,11 +402,6 @@
     }
 
     var m_deleteImage = function () {
-        if (locals.hasOwnProperty('picUrl')){
-            locals.picUrl = undefined;
-            render();
-            return;
-        }
         if (locals.image.localId == undefined) {
             alert('未选择图片');
             return;
@@ -430,14 +417,6 @@
         renderMap();
     };
 
-    var m_modify = function () {
-        $("#failDialog").fadeOut(100);
-        $("#succDialog").fadeOut(100);
-    }
-
-    var m_backToIndex = function () {
-        window.location.href = '/u/found/list?user='+locals.user;
-    }
 
     var m_submit = function () {
         var item = {};
@@ -486,17 +465,23 @@
         if(locals.lat) item['lat'] = locals.lat;
         if(locals.image.serverId) item['media_id'] = locals.image.serverId;
         if(locals.user) item['user'] = locals.user;
+        if(locals.id) item['id'] = locals.id;
+
         item['contactType'] = $("#contactType").val();
         if (item['name']
                 && item['description']
                 && item['contactType']
                 && item['contacts']
                 && item['contactNumber']) {
-            api.post('/api/u/lost/new',item,function (data) {
+            api.post('/api/u/lost/modify',item,function (data) {
                 $("#succDialog").fadeIn(100);
+
             }, function (errno, errmsg, e) {
                 $("#failDialog .weui-dialog .weui-dialog__bd").innerHTML="["+errno+"]:"+errmsg;
                 $("#failDialog").fadeIn(100);
+                $("#succDialog .weui-dialog .weui-dialog__ft .weui-dialog__btn_default").on('click',function () {
+                    $("#succDialog").fadeOut(100);
+                });
             });
         }
     }

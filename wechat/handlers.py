@@ -46,7 +46,7 @@ class LostHandler(WeChatHandler):
         return self.reply_single_news({
             'Title': '丢了东西？',
             'Description': '丢了东西请看这儿~',
-            'Url': self.url_lost_list(),
+            'Url': self.url_found_list(),
         })
 
 class FoundHandler(WeChatHandler):
@@ -58,7 +58,7 @@ class FoundHandler(WeChatHandler):
         return self.reply_single_news({
             'Title': '捡了东西？',
             'Description': '捡了东西请看这儿~',
-            'Url': self.url_found_list(),
+            'Url': self.url_lost_list(),
         })
 
 class AdminLostHandler(WeChatHandler):
