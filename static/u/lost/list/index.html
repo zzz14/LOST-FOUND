@@ -92,7 +92,7 @@
                         };
                         api.get('/api/u/lost/list_search',data,function (data) {
                             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
-                            locals.items = data;
+                            locals.items = data.items;
                             for (i=0;i<data.length;i++) {
                                 updateDate(locals.items[i],'lostTime');
                                 if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
