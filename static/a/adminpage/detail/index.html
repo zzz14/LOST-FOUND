@@ -88,12 +88,11 @@
                 <div class="form-inline col-sm-10" id="input-start_time">
                     <div class="form-group date-input">
                         <select name="type" class="form-control" id="input-type-label">
-                            <option>学生卡</option>
-                            <option>钥匙</option>
-                            <option>文具</option>
-                            <option>生活用品</option>
-                            <option>体育用品</option>
-                            <option>其他</option>
+                            {% if typeList %}
+                                {% for item in typeList %}
+                                 <option>{{ item }}</option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
 
@@ -283,18 +282,15 @@
 
     $(function () {
         swig.setDefaultTZOffset(new Date().getTimezoneOffset());
-        render();
         loginRequired(function () {
-            if (!urlParam.create) {
-                api.get('/api/a/adminpage/detail', {id: urlParam.id}, function (data) {
-                    locals.status = -1;
-                    data.id = parseInt(urlParam.id);
-                    updateDate(data, 'publishTime', 'currentTime');
-                    locals.adminpage = data;
-
-                    render();
-                }, dftFail);
-            }
+            api.get('/api/a/adminpage/typeList', {}, function (data) {
+                locals.status = -1;
+                data.id = parseInt(urlParam.id);
+                updateDate(data, 'publishTime', 'currentTime');
+                locals.typeList = data;
+                console.info(locals.typeList);
+                render();
+            }, dftFail);
         });
     });
 

@@ -77,6 +77,6 @@ class deleteAdminLost(APIView):
     def post(self):
         AdminLost.objects.filter(id=self.input['id']).update(status = 1)
 
-class adminLostDetail(APIView):
+class typeList(APIView):
     def get(self):
-        return publisherIdToPlaces[self.request.user.id]
+        return adminLostType

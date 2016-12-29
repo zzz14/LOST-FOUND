@@ -42,7 +42,6 @@ class FoundListSearch(APIView):
     def divKey(self, content):
         inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
         contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
-        print(contactKeyWord)
         intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
         union = list(set(inputKeyWord).union(set(contactKeyWord)))
         value = len(intersection) / len(union)
@@ -53,7 +52,6 @@ class FoundListSearch(APIView):
         self.check_input('Content')
         items = []
         keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        print(keys)
         result = {}
         for found in Found.objects.filter(status=0):
             temp = {}
@@ -68,14 +66,12 @@ class FoundListSearch(APIView):
             temp['picUrl'] = found.picUrl
             content = found.description+found.name
             temp['divNum'] = self.divKey(content)
-            print(temp['divNum'])
             if self.divKey(content) > 0:
                 items.append(temp)
                 result['keys'] = keys
                 result['items'] = items
         items.sort(key=lambda x: x["divNum"], reverse=True)
         return result
-
 
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
 class LostList(APIView):
@@ -103,7 +99,6 @@ class LostListSearch(APIView):
     def divKey(self, content):
         inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
         contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
-        print(contactKeyWord)
         intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
         union = list(set(inputKeyWord).union(set(contactKeyWord)))
         value = len(intersection) / len(union)
@@ -113,7 +108,6 @@ class LostListSearch(APIView):
         self.check_input('Content')
         items = []
         keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        print(keys)
         result = {}
         for lost in Lost.objects.filter(status=0):
             temp = {}
@@ -129,7 +123,6 @@ class LostListSearch(APIView):
                 temp['lng'] = lost.longitude
             content = lost.description + lost.name
             temp['divNum'] = self.divKey(content)
-            print(temp['divNum'])
             if self.divKey(content) > 0:
                 items.append(temp)
                 result['keys'] = keys
@@ -137,14 +130,11 @@ class LostListSearch(APIView):
         items.sort(key=lambda x: x["divNum"], reverse=True)
         return result
 
-
 # 学校失物招领处失物列表
 class SchoolOfficeLostList(APIView):
     def get(self):
         items = []
         losts = AdminLost.objects.filter(publishTime__gte=self.input['startDate'])
-        print(self.input['startDate'])
-        print(self.input['endDate'])
         losts = losts.exclude(publishTime__gte=self.input['endDate'])
         if 'type' in self.input and\
             self.input['type'] != "" and\
@@ -163,7 +153,6 @@ class SchoolOfficeLostList(APIView):
                     items.append(temp)
         elif 'type' in self.input and\
             self.input['type'] != "":
-            print(2)
             for lost in losts.filter(status=0,type=self.input['type']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
@@ -177,7 +166,6 @@ class SchoolOfficeLostList(APIView):
                     items.append(temp)
         elif 'publisherId' in self.input and\
             self.input['publisherId'] != '0':
-            print(self.input['publisherId'])
             for lost in losts.filter(status=0,publisherId=self.input['publisherId']):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
@@ -190,7 +178,6 @@ class SchoolOfficeLostList(APIView):
                     temp['picUrl'] = url
                     items.append(temp)
         else:
-            print(4)
             for lost in losts.filter(status=0):
                 picUrl = lost.picUrl.split(';')
                 picUrl.pop()
@@ -208,7 +195,6 @@ class SchoolOfficeLostList(APIView):
         info['placeList'] = list(publisherIdToPlaces.values())
         info['items'] = items
         return info
-
 
 # “我的失物”界面，列表中系显示我发出且未删除的失物信息
 # 前端须返回输入user
@@ -232,7 +218,6 @@ class MineLost(APIView):
         items.sort(key=lambda x: x["lostTime"])
         return items
 
-
 # “我的拾物”界面，列表中系显示我发出且未删除的拾物信息
 # 前端须返回输入user
 class MineFound(APIView):
@@ -254,13 +239,11 @@ class MineFound(APIView):
         items.sort(key=lambda x: x["foundTime"])
         return items
 
-
 # 删除我发布的失物信息
 # 需提供信息的id
 class DeleteMineLost(APIView):
     def get(self):
         Lost.objects.filter(id=self.input['id']).update(status=1)
-
 
 # 删除我发布的失物信息
 # 需提供信息的id
@@ -314,7 +297,6 @@ class ModifyLost(APIView):
             f.close()
         lost.save()
 
-
 class ModifyFound(APIView):
     def get(self):
         self.check_input('user', 'id')
@@ -361,7 +343,6 @@ class ModifyFound(APIView):
             f.close()
         found.save()
 
-
 # 拾物详情页
 # 需提供拾物的id
 class FoundDetail(APIView):
@@ -395,7 +376,6 @@ class LostDetail(APIView):
         temp['picUrl'] = lost.picUrl
         temp['reward'] = lost.reward
         return temp
-
 
 # 失物招领处失物详情页
 # 需提供失物的id

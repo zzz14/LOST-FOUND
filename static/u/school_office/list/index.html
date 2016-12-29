@@ -102,8 +102,8 @@
             locals.selectedPlaceId = locals.selectedPlace == "" ? 0 : locals.placeList.indexOf(locals.selectedPlace) + 1;
             locals.startDate = $("#startDate").val();
             locals.endDate = $("#endDate").val();
-            var sendStartDate = (locals.startDate == "") ||  (locals.startDate == "请选择开始日期") ? 0 : ((new Date(Date.parse(locals.startDate.replace(/-/g,  "/")))).valueOf() / 1000),
-                sendEndDate = (locals.endDate == "") || (locals.endDate == "请选择结束日期") ? (new Date('2050-01-01'.replace(/-/g, "/")).valueOf() / 1000) : ((new Date(Date.parse(locals.endDate.replace(/-/g,  "/")))).valueOf() / 1000);
+            var sendStartDate = (locals.startDate == "") ? 0 : ((new Date(Date.parse(locals.startDate.replace(/-/g,  "/")))).valueOf() / 1000),
+                sendEndDate = (locals.endDate == "") ? (new Date('2050-01-01'.replace(/-/g, "/")).valueOf() / 1000) : ((new Date(Date.parse(locals.endDate.replace(/-/g,  "/")))).valueOf() / 1000);
             api.get('/api/u/school_office/list',{
                 "publisherId":locals.selectedPlaceId,
                 "type":locals.selectedType,
