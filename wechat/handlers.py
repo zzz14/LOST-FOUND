@@ -24,19 +24,6 @@ class DefaultHandler(WeChatHandler):
     def handle(self):
         return self.reply_text('对不起，没有找到您需要的信息:(')
 
-
-class HelpHandler(WeChatHandler):
-
-    def check(self):
-        return self.is_text('帮助', 'help') or self.is_event_click('HELP')
-
-    def handle(self):
-        return self.reply_single_news({
-            'Title': self.get_message('help_title'),
-            'Description': self.get_message('help_description'),
-            'Url': self.url_help(),
-        })
-
 class LostHandler(WeChatHandler):
 
     def check(self):
@@ -80,7 +67,7 @@ class MineHandler(WeChatHandler):
 
     def handle(self):
         return self.reply_single_news({
-            'Title': '我的失物',
+            'Title': '我的',
             'Description': '看看你丢了多少东西',
             'Url': self.url_mine(),
         })

@@ -381,7 +381,6 @@ var m_chooseImage = function () {
                 localId: locals.image.localId,
                 success: function (res) {
                     locals.image.serverId = res.serverId;
-                    alert(res.serverId);
                     alert('上传成功');
                     render();
                 },
