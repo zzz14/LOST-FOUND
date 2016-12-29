@@ -418,28 +418,28 @@
     var m_submit = function () {
         var item = {};
         var warningHtml = '<div class="weui-cell__ft warning-div"> <i class="weui-icon-warn"></i> </div>'
-        if(!locals.itemName) {
+        if(!locals.itemName && document.getElementById("itemName-cell").children.length == 1) {
             $("#itemName-cell").append(warningHtml);
-        } else {
+        } else if (locals.itemName){
             item['name'] = locals.itemName;
             $("#itemName-cell .warning-div").remove();
         }
-        if(!locals.contactNumber){
+        if(!locals.contactNumber && document.getElementById("contactNumber-cell").children.length == 1){
             $("#contactNumber-cell").append(warningHtml);
-        }else{
+        }else if (locals.contactNumber){
             item['contactNumber'] = locals.contactNumber;
             $("#contactNumber-cell .warning-div").remove();
         }
         //TODO: 描述的warning图标没有
-        if(!locals.itemDescription){
+        if(!locals.itemDescription && document.getElementById("itemDescription-cell").children.length == 1){
             $("#itemDescription-cell").append(warningHtml);
-        }else {
+        }else if (locals.itemDescription){
             item['description'] = locals.itemDescription;
             $("#itemDescription-cell .warning-div").remove();
         }
-        if(!locals.contacts){
+        if(!locals.contacts && document.getElementById("contacts-cell").children.length == 1){
             $("#contacts-cell").append(warningHtml);
-        }else {
+        }else if (locals.contacts){
             item['contacts'] = locals.contacts;
             $("#contacts-cell .warning-div").remove();
         }
