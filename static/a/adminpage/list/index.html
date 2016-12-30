@@ -11,7 +11,7 @@
     <link href="/3rd/bs/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="/css/adminpage_list.css" />
 
-    <title>失物招领处管理员</title>
+    <title>列表 - 失物招领处管理员</title>
 </head>
 <body>
     <header class="navbar navbar-default navbar-fixed-top navbar-header" role="navigation">
@@ -53,20 +53,20 @@
 </script>
 
 <script type="text/template" id="tpl-nav-li">
-    <li class="active"><a class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/list">我的发布</a></li>
-    <li class="active"><a class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/detail?create=1&adminName={{adminpages.adminName }}">新建发布</a></li>
+    <li class="active"><a id="my-publish" class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/list">我的发布</a></li>
+    <li class="active"><a id="new-admin" class="btn-link" style="margin-top: 0.48em; font-size: 19px;" href="/a/adminpage/detail?create=1&adminName={{adminpages.adminName }}">新建发布</a></li>
 </script>
 
 <script type="text/template" id="tpl-nav-li-right">
     <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px; color: #9B9B9B" >{{  adminpages.adminName }}</a></li>
-    <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px;" onclick="logout()" >注销</a></li>
+    <li><a href="javascript:;" style="margin-top: 0.48em; font-size: 19px;" id="logout-button" onclick="logout()" >注销</a></li>
 </script>
 
 
 <script type="text/template" id="tpl-content">
     <div class="container" xmlns="http://www.w3.org/1999/html">
         <div class="pageheader">
-            <h1 class="lead">我的上传列表</h1>
+            <h1 id="my-upload-list" class="lead">我的上传列表</h1>
         </div>
 
         <div class="panel panel-default">

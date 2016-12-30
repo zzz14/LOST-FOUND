@@ -10,7 +10,7 @@
     </style>
     <link href="/3rd/bs/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="/css/adminpage_detail.css" />
-    <title>失物招领处管理员</title>
+    <title>新建 - 失物招领处管理员</title>
 </head>
 <body>
     <header class="navbar navbar-default navbar-fixed-top navbar-header" role="navigation">
@@ -208,14 +208,6 @@
                 render();
             });
         }
-        /*
-        if (locals.adminpage) {
-            lockByStatus(locals.activity.status, locals.activity.bookStart, locals.activity.startTime, locals.activity.endTime, locals.activity.currentTime);
-            if (!urlParam.create && locals.activity.currentTime > locals.activity.bookStart) {
-                initialProgress(locals.activity.usedTickets, locals.activity.bookedTickets, locals.activity.totalTickets);
-            }
-        }
-        */
 
         //上传图片
         $('#fileUploadBtn').on('change', function () {

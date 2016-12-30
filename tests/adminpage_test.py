@@ -19,7 +19,7 @@ class LoginLogoutTest(LiveServerTestCase):
     def setUpClass(self):
         super(LoginLogoutTest, self).setUpClass()
         self.browser = webdriver.PhantomJS()
-        self.wait = WebDriverWait(self.browser, 5)
+        self.wait = WebDriverWait(self.browser, 6)
         self.browser.set_window_size(1920, 1080)
         user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
 
@@ -47,9 +47,67 @@ class LoginLogoutTest(LiveServerTestCase):
         submit_button.click()
         sleep(0.1)
 
+    '''
+    # 非注册用户
+    def test_guest_tour(self):
+        self.browser.get(self.live_server_url + '/a')
+        self.wait.until(EC.title_contains('失物招领'))
+        self.assertUrl('/a/login?next=%2Fa')
+        self.login('john233', 'johnpassword')
+        alert = self.browser.find_element_by_id('alert')
+        self.wait.until(EC.visibility_of((alert)))
+        self.assertIn('login error', alert.text)
+        self.browser.get(self.live_server_url + '/a/adminpage/list')
+        self.wait.until(EC.title_contains('登录'))
+        self.assertUrl('/a/login?next=%2Fa%2Fadminpage%2Flist')
+
+
+    # 密码正确
     def test_admin_login_with_right_pass(self):
         self.login('john', 'johnpassword')
-        self.browser.get_screenshot_as_file('tests/1_login.png')
+        sleep(3)
+        self.browser.get_screenshot_as_file('tests/pic/11_login.png')
+        self.assertUrl('/a/adminpage/list')
         self.browser.get(self.live_server_url + '/a/adminpage/list')
-        self.browser.get_screenshot_as_file('tests/2_list.png')
+        self.browser.get_screenshot_as_file('tests/pic/12_list.png')
+
+    # 密码错误
+    def test_admin_login_with_wrong_pass(self):
+        self.login('john', 'johnpassword233')
+        self.browser.get_screenshot_as_file('tests/pic/21_login.png')
+        alert = self.browser.find_element_by_id('alert')
+        self.wait.until(EC.visibility_of((alert)))
+        self.assertIn('login error', alert.text)
+        self.browser.get(self.live_server_url + '/a/adminpage/list')
+        self.browser.get_screenshot_as_file('tests/pic/22_list.png')
+        self.wait.until(EC.title_contains('登录'))
+        self.assertUrl('/a/login?next=%2Fa%2Fadminpage%2Flist')
+    '''
+
+    # 注销
+    def test_logout(self):
+        self.login('john', 'johnpassword')
+        sleep(4)
+        self.browser.get(self.live_server_url + '/a/adminpage/list')
+        self.browser.get_screenshot_as_file('tests/pic/31_login.png')
+        self.wait.until(EC.presence_of_element_located((By.ID, 'my-upload-list')))
+        submit_button1 = self.browser.find_element_by_id('logout-button')
+        submit_button1.click()
+        sleep(1)
+        self.wait.until(EC.title_contains('登录'))
+        self.assertUrl('/a/login')
+
+    def test_newAdminLost(self):
+        self.login('john', 'johnpassword')
+        sleep(2)
+        self.browser.get(self.live_server_url + '/a/adminpage/list')
+        self.wait.until(EC.presence_of_elements_located((By.ID, 'fileUploadBtn')))
+        submit_button1 = self.browser.find_element_by_id('new-admin')
+        submit_button1.click()
+        self.browser.get_screenshot_as_file('tests/pic/41_login.png')
+        sleep(1)
+
+
+
+
 
