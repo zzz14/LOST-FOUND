@@ -51,20 +51,10 @@ class LostList(APIView):
 
 #失物招领列表的搜索
 class FoundListSearch(APIView):
-
-    def divKey(self, content):
-        inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
-        intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
-        union = list(set(inputKeyWord).union(set(contactKeyWord)))
-        value = len(intersection) / len(union)
-        return value
-
-
     def get(self):
-        self.check_input('Content')
+        self.check_input('content')
         items = []
-        keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        keys = list(jieba.analyse.extract_tags(self.input['content'], topK=25))
         result = {}
         for found in Found.objects.filter(status=0):
             temp = {}
@@ -81,10 +71,19 @@ class FoundListSearch(APIView):
             temp['divNum'] = self.divKey(content)
             if self.divKey(content) > 0:
                 items.append(temp)
-                result['keys'] = keys
-                result['items'] = items
+        result['keys'] = keys
         items.sort(key=lambda x: x["divNum"], reverse=True)
+        result['items'] = items
         return result
+
+    def divKey(self, content):
+        inputKeyWord = list(jieba.analyse.extract_tags(self.input['content'], topK=25))
+        contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
+        intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
+        union = list(set(inputKeyWord).union(set(contactKeyWord)))
+        value = len(intersection) / len(union)
+        return value
+
 
 
 # 点击“捡了东西”后出现的列表（丢失物品的列表）
@@ -109,19 +108,10 @@ class LostList(APIView):
 
 # 失物招领列表的搜索
 class LostListSearch(APIView):
-
-    def divKey(self, content):
-        inputKeyWord = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
-        contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
-        intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
-        union = list(set(inputKeyWord).union(set(contactKeyWord)))
-        value = len(intersection) / len(union)
-        return value
-
     def get(self):
-        self.check_input('Content')
+        self.check_input('content')
         items = []
-        keys = list(jieba.analyse.extract_tags(self.input['Content'], topK=25))
+        keys = list(jieba.analyse.extract_tags(self.input['content'], topK=25))
         result = {}
         for lost in Lost.objects.filter(status=0):
             temp = {}
@@ -139,10 +129,19 @@ class LostListSearch(APIView):
             temp['divNum'] = self.divKey(content)
             if self.divKey(content) > 0:
                 items.append(temp)
-                result['keys'] = keys
-                result['items'] = items
+        result['keys'] = keys
         items.sort(key=lambda x: x["divNum"], reverse=True)
+        result['items'] = items
         return result
+
+    def divKey(self, content):
+        inputKeyWord = list(jieba.analyse.extract_tags(self.input['content'], topK=25))
+        contactKeyWord = list(jieba.analyse.extract_tags(content, topK=25))
+        intersection = list(set(inputKeyWord).intersection(set(contactKeyWord)))
+        union = list(set(inputKeyWord).union(set(contactKeyWord)))
+        value = len(intersection) / len(union)
+        return value
+
 
 # 学校失物招领处失物列表
 class SchoolOfficeLostList(APIView):
@@ -301,10 +300,10 @@ class ModifyLost(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            pic_name = self.input['media_id']+'.jpg'
+            pic_name = self.input['media_id'].replace('_', ']')+'.jpg'
             pic_path = os.path.join('img','lost',pic_name)
             pic_full_path = os.path.join(STATIC_ROOT,pic_path)
-            lost.picUrl = get_url(pic_path)
+            lost.picUrl = pic_path
             f = open(pic_full_path, 'wb')
             # TODO
             f.write(pic.read())
@@ -344,10 +343,10 @@ class ModifyFound(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            pic_name = self.input['media_id']+'.jpg'
+            pic_name = self.input['media_id'].replace('_', ']')+'.jpg'
             pic_path = os.path.join('img','found',pic_name)
             pic_full_path = os.path.join(STATIC_ROOT,pic_path)
-            found.picUrl = get_url(pic_path)
+            found.picUrl = pic_path
             f = open(pic_full_path, 'wb')
             # TODO
             f.write(pic.read())
@@ -421,10 +420,6 @@ class NewLost(APIView):
                     reward=self.input['reward'],
                     user=user,
                     status=0)
-        if 'lng' in self.input:
-            lost.longitude = self.input['lng']
-        if 'lat' in self.input:
-            lost.latitude = self.input['lat']
         if 'media_id' in self.input:
             getData = {}
             getData['access_token'] = WeChatLib.get_wechat_access_token()
@@ -432,10 +427,10 @@ class NewLost(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            pic_name = self.input['media_id']+'.jpg'
+            pic_name = self.input['media_id'].replace('_', ']')+'.jpg'
             pic_path = os.path.join('img','lost',pic_name)
             pic_full_path = os.path.join(STATIC_ROOT,pic_path)
-            lost.picUrl = get_url(pic_path)
+            lost.picUrl = pic_path
             f = open(pic_full_path, 'wb')
             # TODO
             f.write(pic.read())
@@ -468,10 +463,10 @@ class NewFound(APIView):
             data = urllib.parse.urlencode(getData)
             url = "https://api.weixin.qq.com/cgi-bin/media/get?" + data
             pic = urllib.request.urlopen(url)
-            pic_name = self.input['media_id'] + '.jpg'
+            pic_name = self.input['media_id'].replace('_', ']') + '.jpg'
             pic_path = os.path.join('img', 'found', pic_name)
             pic_full_path = os.path.join(STATIC_ROOT, pic_path)
-            found.picUrl = get_url(pic_path)
+            found.picUrl = pic_path
             f = open(pic_full_path, 'wb')
             # TODO
             f.write(pic.read())

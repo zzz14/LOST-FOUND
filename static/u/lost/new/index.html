@@ -251,7 +251,7 @@
                     var geoc = new BMap.Geocoder();
                     geoc.getLocation(pt,function (rs) {
                         var pois = rs.surroundingPois;
-                        input.val(pois[1].title);
+                        input.value = pois[1].title;
                     });
                 });
                 maps.map.addOverlay(maps.marker);

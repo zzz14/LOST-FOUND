@@ -17,7 +17,7 @@
 
     <div class="weui-flex">
         <div class="weui-flex__item" style="background-color: #f9f9f9">
-            <img src="{{ found.picUrl }}" style="width: 90%; padding: 10px 0px; display: block; margin-left: auto; margin-right: auto; border-radius: 5%">
+            <img src="{% if found.picUrl %}/{{ found.picUrl }}{% else %}/img/default.jpg{% endif %}" style="width: 90%; padding: 10px 0px; display: block; margin-left: auto; margin-right: auto; border-radius: 5%">
         </div>
     </div>
     <div class="weui-flex">
