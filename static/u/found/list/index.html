@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8"/>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="/css/weui.css"/>
     <title>拾物列表</title>
@@ -15,11 +15,11 @@
 
 <script type="text/template" id="tpl-searchbar">
 
-<div class="weui-search-bar" id="searchBar">
+<div class="weui-search-bar" id="searchBar" style="width:100%; z-index:99; position:fixed">
     <form class="weui-search-bar__form">
         <div class="weui-search-bar__box">
             <i class="weui-icon-search"></i>
-            <input class="weui-search-bar__input" type="search" id="searchInput" placeholder="搜索" required />
+            <input class="weui-search-bar__input" type="text" id="searchInput" placeholder="搜索" required />
             <a href="javascript:" class="weui-icon-clear" id="searchClear"></a>
         </div>
         <label class="weui-search-bar__label" id="searchText">
@@ -29,8 +29,10 @@
     </form>
     <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
     <a href="javascript:" class="weui-search-bar_focusing" id="createFound"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
-    <a href="javascript:" class="weui-search-bar_focusing" id="searchByPlace"><img src="/img/location.png" style="padding-left: 0.4em; vertical-align:middle; width:1em "></a>
 </div>
+
+    <!-- 用来占位 -->
+    <div style="height:44px"></div>
 </script>
 
 <script type="text/template" id="tpl-mainbody">
@@ -43,7 +45,7 @@
 
         <div class="weui-media-box weui-media-box_appmsg item" id="item-{{ item.id }}">
             <div class="weui-media-box__hd">
-                <img class="weui-media-box__thumb" src="{% if item.picUrl %}{{ item.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
+                <img class="weui-media-box__thumb" src="{% if item.picUrl %}/{{ item.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
             </div>
             <div class="weui-media-box__bd">
                 <h4 class="weui-media-box__title">{{ item.name }}</h4>
@@ -86,14 +88,15 @@
                     if(!this.value.length) cancelSearch();
                 })
                 .on('keypress', function(e) {
-                    if (e.which == 13) {
+                    if (e.which == 13 && $(this).val()!="") {
+                        e.preventDefault();
                         data = {
-                            'Content': $(this).val(),
+                            content:$(this).val(),
                         };
-                        api.get('/api/u/found/list_search',data,function (data) {
+                        api.get('/api/u/found/list_search',{content:$(this).val()},function (data) {
                             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
-                            locals.items = data.items;
-                            for (i=0;i<data.length;i++) {
+                            locals.items = data['items'];
+                            for (i=0;i<data['items'].length;i++) {
                                 updateDate(locals.items[i],'foundTime');
                                 if( locals.items[i].foundTime.yyyymmdd() != '1970-01-01')
                                     locals.items[i].showtime = locals.items[i].foundTime.yyyymmdd();
@@ -127,6 +130,18 @@
             $('#searchText').show();
             $('#createFound').show();
             $('#searchByPlace').show();
+            api.get('/api/u/found/list', {}, function (data) {
+                swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+                locals.items = data;
+                for (i=0;i<data.length;i++) {
+                    updateDate(locals.items[i],'foundTime');
+                    if( locals.items[i].foundTime.yyyymmdd() != '1970-01-01')
+                        locals.items[i].showtime = locals.items[i].foundTime.yyyymmdd();
+                    if(locals.items[i].foundPlace.length > 10)
+                        locals.items[i].foundPlace = locals.items[i].foundPlace.substring(0,9)+"..."
+                }
+                renderMainbody();
+            }, dftFail);
         }
     };
     var renderMainbody = function () {

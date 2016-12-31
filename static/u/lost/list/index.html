@@ -15,7 +15,7 @@
 
 <script type="text/template" id="tpl-searchbar">
 
-<div class="weui-search-bar" id="searchBar">
+<div class="weui-search-bar" id="searchBar" style="width:100%; z-index:99; position:fixed">
     <form class="weui-search-bar__form">
         <div class="weui-search-bar__box">
             <i class="weui-icon-search"></i>
@@ -29,8 +29,9 @@
     </form>
     <a href="javascript:" class="weui-search-bar__cancel-btn" id="searchCancel">取消</a>
     <a href="javascript:" class="weui-search-bar_focusing" id="createLost"><img src="/img/new.png" style="padding-left: 0.3em; vertical-align:middle; width:1em "></a>
-    <a href="javascript:" class="weui-search-bar_focusing" id="searchByPlace"><img src="/img/location.png" style="padding-left: 0.4em; vertical-align:middle; width:1em "></a>
 </div>
+        <div style="height:44px"></div>
+
 </script>
 
 <script type="text/template" id="tpl-mainbody">
@@ -43,7 +44,7 @@
 
         <div class="weui-media-box weui-media-box_appmsg item" id="item-{{ item.id }}">
             <div class="weui-media-box__hd">
-                <img class="weui-media-box__thumb" src="{% if item.picUrl %}{{ item.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
+                <img class="weui-media-box__thumb" src="{% if item.picUrl %}/{{ item.picUrl }}{% else %}/img/default.jpg{% endif %}" alt>
             </div>
             <div class="weui-media-box__bd">
                 <h4 class="weui-media-box__title">{{ item.name }}</h4>
@@ -87,13 +88,14 @@
                 })
                 .on('keypress', function(e) {
                     if (e.which == 13) {
+                        e.preventDefault();
                         data = {
-                            'Content': $(this).val(),
+                            'content': $(this).val(),
                         };
                         api.get('/api/u/lost/list_search',data,function (data) {
                             swig.setDefaultTZOffset(new Date().getTimezoneOffset());
-                            locals.items = data.items;
-                            for (i=0;i<data.length;i++) {
+                            locals.items = data['items'];
+                            for (i=0;i<data['items'].length;i++) {
                                 updateDate(locals.items[i],'lostTime');
                                 if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
                                     locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
@@ -127,6 +129,18 @@
             $('#searchText').show();
             $('#createLost').show();
             $('#searchByPlace').show();
+            api.get('/api/u/lost/list', {}, function (data) {
+                swig.setDefaultTZOffset(new Date().getTimezoneOffset());
+                locals.items = data;
+                for (i=0;i<data.length;i++) {
+                    updateDate(locals.items[i],'lostTime');
+                    if( locals.items[i].lostTime.yyyymmdd() != '1970-01-01')
+                        locals.items[i].showtime = locals.items[i].lostTime.yyyymmdd();
+                    if(locals.items[i].lostPlace.length > 10)
+                        locals.items[i].lostPlace = locals.items[i].lostPlace.substring(0,9)+"..."
+                }
+                renderMainbody();
+            }, dftFail);
         }
     };
     var renderMainbody = function () {
